@@ -45,7 +45,7 @@ class EllipIndex(IntEnum):
     z = 2
     a1 = 0
     a2 = 1
-    a3 = 0
+    a3 = 2
 
 
 def get_BE_equilibrium_radius(mass_r):
