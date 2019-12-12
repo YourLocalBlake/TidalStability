@@ -36,6 +36,18 @@ class ODEIndex(IntEnum):
     # Theta, phi are the same as above.
 
 
+class EllipIndex(IntEnum):
+    """
+    Enumerated number for array index for variables in the elliptical integrals
+    """
+    x = 0
+    y = 1
+    z = 2
+    a1 = 0
+    a2 = 1
+    a3 = 2
+
+
 def get_BE_equilibrium_radius(mass_r):
     """
     :param mass_r, int, goes between 0 and 5 sqrt(5)/16

@@ -12,7 +12,7 @@ from scikits.odes import ode
 from scikits.odes.sundials import CVODESolveFailed, CVODESolveFoundRoot, CVODESolveReachedTSTOP
 from scikits.odes.sundials.cvode import StatusEnum
 
-from src.utils import ODEIndex
+from src.utils import ODEIndex, EllipIndex
 from src.data_formats import InternalData, Solution, create_results_file
 from src.solve.utils import xy_close_stop_generator, get_jump_amount, ontstop_cont, ontstop_stop
 from src.solve.geometry import get_Ax, get_Ay, get_Az
@@ -87,13 +87,13 @@ def ode_system(*, a1, a2, a3, ρ_pressure_over_ρ_tides, ρ_real_over_ρ_pressur
         deriv_ϕ, ϕ_i = deriv_ϕ_func(ϕdot=ϕdot)
 
         # Second order derivative functions
-        deriv_xdot, xdot_i = deriv_xdot_func(x=x, y=y, z=z, θ=θ, θdot=θdot, ϕdot=ϕdot-θdot, A1=Ai[0],
+        deriv_xdot, xdot_i = deriv_xdot_func(x=x, y=y, z=z, θ=θ, θdot=θdot, ϕdot=ϕdot-θdot, A1=Ai[EllipIndex.x],
                                              ρ_real_over_ρ_pressure=ρ_real_over_ρ_pressure_updating,
                                              ρ_pressure_over_ρ_tides=ρ_pressure_over_ρ_tides)
-        deriv_ydot, ydot_i = deriv_ydot_func(x=x, y=y, z=z, θ=θ, θdot=θdot, ϕdot=ϕdot-θdot, A2=Ai[1],
+        deriv_ydot, ydot_i = deriv_ydot_func(x=x, y=y, z=z, θ=θ, θdot=θdot, ϕdot=ϕdot-θdot, A2=Ai[EllipIndex.y],
                                              ρ_real_over_ρ_pressure=ρ_real_over_ρ_pressure_updating,
                                              ρ_pressure_over_ρ_tides=ρ_pressure_over_ρ_tides)
-        deriv_zdot, zdot_i = deriv_zdot_func(x=x, y=y, z=z, A3=Ai[2],
+        deriv_zdot, zdot_i = deriv_zdot_func(x=x, y=y, z=z, A3=Ai[EllipIndex.z],
                                              ρ_real_over_ρ_pressure=ρ_real_over_ρ_pressure_updating,
                                              ρ_pressure_over_ρ_tides=ρ_pressure_over_ρ_tides)
         deriv_θdot, θdot_i = deriv_θdot_func(x=x, xdot=xdot, y=y, ydot=ydot, θ=θ, θdot=θdot, ϕdot=ϕdot-θdot,
@@ -212,13 +212,13 @@ def calc_xy_singularity(*, current_sol, jump_amount, system_config):
     ρ_real_over_ρ_pressure_updating = current_sol.ρ_real_over_ρ_pressure * (x * y * z)
 
     # Numerically calculate the first and second order derivatives at the time point using the previous timestep values
-    deriv_xdot, _ = deriv_xdot_func(x=x, y=y, z=z, θ=θ, θdot=θdot, ϕdot=ϕdot-θdot, A1=Ai[0],
+    deriv_xdot, _ = deriv_xdot_func(x=x, y=y, z=z, θ=θ, θdot=θdot, ϕdot=ϕdot-θdot, A1=Ai[EllipIndex.x],
                                     ρ_real_over_ρ_pressure=ρ_real_over_ρ_pressure_updating,
                                     ρ_pressure_over_ρ_tides=current_sol.ρ_pressure_over_ρ_tides)
-    deriv_ydot, _ = deriv_ydot_func(x=x, y=y, z=z, θ=θ, θdot=θdot, ϕdot=ϕdot-θdot, A2=Ai[1],
+    deriv_ydot, _ = deriv_ydot_func(x=x, y=y, z=z, θ=θ, θdot=θdot, ϕdot=ϕdot-θdot, A2=Ai[EllipIndex.y],
                                     ρ_real_over_ρ_pressure=ρ_real_over_ρ_pressure_updating,
                                     ρ_pressure_over_ρ_tides=current_sol.ρ_pressure_over_ρ_tides)
-    deriv_zdot, _ = deriv_zdot_func(x=x, y=y, z=z, A3=Ai[2],
+    deriv_zdot, _ = deriv_zdot_func(x=x, y=y, z=z, A3=Ai[EllipIndex.z],
                                     ρ_real_over_ρ_pressure=ρ_real_over_ρ_pressure_updating,
                                     ρ_pressure_over_ρ_tides=current_sol.ρ_pressure_over_ρ_tides)
     deriv_θdot, _ = deriv_θdot_func(x=x, xdot=xdot, y=y, ydot=ydot, θ=θ, θdot=θdot, ϕdot=ϕdot-θdot,
