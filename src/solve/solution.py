@@ -24,7 +24,7 @@ from src.solve.deriv_funcs import (deriv_x_func, deriv_xdot_func,
                                    deriv_ϕdot_func)
 
 
-def ode_system(*, a1, a2, a3, ρ_pressure_over_ρ_tides, ρ_real_over_ρ_pressure, store_internal=True):
+def ode_system(*, a1, a2, a3, mass_r, ρ_pressure_over_ρ_tides, ρ_real_over_ρ_pressure, store_internal=True):
     """
     Create the mathematical ODE model for the tri-axial ellipsoid.
     Returns the sundials ode model which will be solved.
@@ -87,13 +87,15 @@ def ode_system(*, a1, a2, a3, ρ_pressure_over_ρ_tides, ρ_real_over_ρ_pressur
         deriv_ϕ, ϕ_i = deriv_ϕ_func(ϕdot=ϕdot)
 
         # Second order derivative functions
-        deriv_xdot, xdot_i = deriv_xdot_func(x=x, y=y, z=z, θ=θ, θdot=θdot, ϕdot=ϕdot-θdot, A1=Ai[EllipIndex.x],
+        deriv_xdot, xdot_i = deriv_xdot_func(x=x, y=y, z=z, θ=θ, θdot=θdot, ϕdot=ϕdot-θdot, mass_r=mass_r,
+                                             A1=Ai[EllipIndex.x],
                                              ρ_real_over_ρ_pressure=ρ_real_over_ρ_pressure_updating,
                                              ρ_pressure_over_ρ_tides=ρ_pressure_over_ρ_tides)
-        deriv_ydot, ydot_i = deriv_ydot_func(x=x, y=y, z=z, θ=θ, θdot=θdot, ϕdot=ϕdot-θdot, A2=Ai[EllipIndex.y],
+        deriv_ydot, ydot_i = deriv_ydot_func(x=x, y=y, z=z, θ=θ, θdot=θdot, ϕdot=ϕdot-θdot,  mass_r=mass_r,
+                                             A2=Ai[EllipIndex.y],
                                              ρ_real_over_ρ_pressure=ρ_real_over_ρ_pressure_updating,
                                              ρ_pressure_over_ρ_tides=ρ_pressure_over_ρ_tides)
-        deriv_zdot, zdot_i = deriv_zdot_func(x=x, y=y, z=z, A3=Ai[EllipIndex.z],
+        deriv_zdot, zdot_i = deriv_zdot_func(x=x, y=y, z=z,  mass_r=mass_r, A3=Ai[EllipIndex.z],
                                              ρ_real_over_ρ_pressure=ρ_real_over_ρ_pressure_updating,
                                              ρ_pressure_over_ρ_tides=ρ_pressure_over_ρ_tides)
         deriv_θdot, θdot_i = deriv_θdot_func(x=x, xdot=xdot, y=y, ydot=ydot, θ=θ, θdot=θdot, ϕdot=ϕdot-θdot,
@@ -140,6 +142,7 @@ def calc_numerical_solution(*, initial_conditions, solver_config, time, tstop):
        a1=initial_conditions.ode_init_con[0],
        a2=initial_conditions.ode_init_con[2],
        a3=initial_conditions.ode_init_con[4],
+       mass_r=initial_conditions.mass_r,
        ρ_pressure_over_ρ_tides=initial_conditions.ρ_pressure_over_ρ_tides,
        ρ_real_over_ρ_pressure=initial_conditions.ρ_real_over_ρ_pressure
        )
