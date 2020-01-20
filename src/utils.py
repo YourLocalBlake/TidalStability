@@ -83,10 +83,9 @@ def get_BE_equilibrium_radius(mass_r):
         return float(rad_low), float(rad_low)
     try:
         rad_hig = brenth(_eq_rad_dimless, val_range[val_idx] + 1e-10, val_range[-1])
-        print("and at this pressure an equilibrium radii of r = {}, {} cm exists.".format(round(rad_low, 10),
-                                                                                          round(rad_hig, 10)))
-        print("MAKE SURE THE RADII ARE DIFFERENT.", "\n",
-              "The root-finding algorithm CAN BE temperamental for the larger root")
+        print("and at this pressure equilibrium radii of r = {} and {} cm exist.".format(round(rad_low, 10),
+                                                                                          round(rad_hig, 10)),
+              "\n" + "The root-finding algorithm can temperamental for the larger root, so check they are different")
     except ValueError:
         print("Root finding algorithm could not find a root to the radius equation."
               "Did you give a proper initial guess?, try changing initial guess, else no equilibrium might exist")
@@ -149,7 +148,7 @@ def get_BE_mass_0to5sqrt5o16(ρ_normalised, override_percentage=-1):
     else:
         print("Solving for a mass cloud of " +
               str(ρ_normalised * sqrt((ρ_normalised - 1)/(3/5 * ρ_normalised**2))**3) +
-              " m_BE")
+              " m_BE, this value goes between 0 and approx 0.69877")
         return ρ_normalised * sqrt((ρ_normalised - 1)/(3/5 * ρ_normalised**2))**3
 
 
