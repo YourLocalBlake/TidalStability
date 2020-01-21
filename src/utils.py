@@ -240,7 +240,7 @@ def get_ai_lengths(alpha, ρ, ρ_tidal, return_only_a1=False):
             """
             Equation for root solver
             """
-            return a1 ** 2 * a3oa1**2 * ρ_tidal - 5 * (1 - 1 / ρ)
+            return a1**2 * a3oa1**2 * ρ_tidal - 5 * (1 - 1 / ρ)
 
         return brenth(_get_a1_length, 0.001, 300)
 
@@ -260,7 +260,7 @@ def get_ai_lengths(alpha, ρ, ρ_tidal, return_only_a1=False):
         return [a1_len, a2_len, a3_len], mass
 
 
-def get_ai_lengths_chandrasekhar(a3_over_a1_index, specific_ρ=False):
+def get_ai_lengths_chandrasekhar(a3_over_a1_index, specific_ρ):
     """
     Generate the ai lengths for the cloud based on the work by Chandrasekhar. Additionally calculates mass, mu, and
     tidal strength
@@ -309,7 +309,7 @@ def get_ai_lengths_chandrasekhar(a3_over_a1_index, specific_ρ=False):
     if specific_ρ:
         ρs = [specific_ρ]
     else:
-        ρs = arange(1.03, 3.8, 0.01)
+        raise SystemExit("Old implementation of not requiring a specific_rho was removed.")
 
     a1_lens = []
     a2_lens = []
@@ -334,4 +334,4 @@ def get_ai_lengths_chandrasekhar(a3_over_a1_index, specific_ρ=False):
         # and the mass
         mass_vals.append(4/3 * current_ρ * a2_over_a1 * a3_over_a1 * a1**3)
 
-    return [a1_lens, a2_lens, a3_lens], [mass_vals, ρ_tidal_vals, mu_vals]
+    return [a1_lens, a2_lens, a3_lens], mass_vals, [ρ_tidal_vals, mu_vals]

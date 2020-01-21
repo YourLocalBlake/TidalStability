@@ -105,17 +105,18 @@ def combined_deriv_eqs(x, ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides, �
             deriv_zdot_func_vec(x, ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides)]
 
 
-def get_rot_equ_axis_lengths(alpha, ρ_tides, rho_lim, ρ_init=1.0001, small_equ_set=True):
+def get_rot_equ_axis_lengths(alpha, rho_lim, ρ_tides, ρ_init=1.0001, small_equ_set=True, final_only=True):
     """
     Calculates the equilibrium axis lengths based on the full ODE system for a ellipsoid with a given density, tidal
     density and with an internal streaming velocity. Initial conditions are initially calculated with no gravity.
     Following this the equilibrium solution to solved by "hopping" to the desired ellipsoidal conditions through solving
     the full ODE system with small increments in its parameters.
     :param alpha: int: internal streaming rate
-    :param ρ_tides:
-    :param rho_lim:
-    :param ρ_init:
-    :param max_iter:
+    :param rho_lim: int: the maximum density value to be calculated. This should be between 1 and 4.
+    :param ρ_tides: int: The tidal density
+    :param ρ_init: int: The initial density of the cloud - does not need to be changed
+    :param small_equ_set: bool: determine to use the larger or the smaller (unstable/stable) equ solutions.
+    :param final_only: bool: return only the final (rho_lim) values for axis lengths
     :return:
     """
 
@@ -203,7 +204,14 @@ def get_rot_equ_axis_lengths(alpha, ρ_tides, rho_lim, ρ_init=1.0001, small_equ
         # increment density and back through the loop we go
         ρ_init = ρ_init + 1/1000
 
-    return ai_list, ρ_list, indexs_calculated, no_grav_a1
+    if final_only:
+        ai_list = ai_list[-1]
+        ρ_list = ρ_list[-1]
+        mass = [4 / 3 * ρ_list * ai_list[0] * ai_list[1] * ai_list[2]]
+    else:
+        mass = [4 / 3 * ρ * a1 * a2 * a3 for ρ, (a1, a2, a3) in zip(ρ_list, ai_list)]
+
+    return ai_list, mass, [ρ_list, indexs_calculated, no_grav_a1]
 
 
 def index_finder(ρ_list, ρ_wanted):
