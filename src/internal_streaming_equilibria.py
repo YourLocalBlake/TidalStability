@@ -120,6 +120,9 @@ def get_rot_equ_axis_lengths(alpha, rho_lim, ρ_tides, ρ_init=1.0001, small_equ
     :return:
     """
 
+    if alpha == 0:
+        raise SystemExit("Alpha was zero, select a non-zero value and rerun. Exiting. ")
+
     # Constants
     ϕdot = alpha * sqrt(ρ_tides)
 
@@ -128,7 +131,7 @@ def get_rot_equ_axis_lengths(alpha, rho_lim, ρ_tides, ρ_init=1.0001, small_equ
     a1 = get_ai_lengths(alpha=alpha, ρ=ρ_init, ρ_tidal=ρ_tides, return_only_a1=True)
     a2 = a2oa1 * a1
     a3 = a3oa1 * a1
-    no_grav_a1 = [a1]
+    no_grav_a1 = a1
 
     # Prepare the parameters to solve the ODE system.
     indexs_calculated = 0
@@ -207,7 +210,7 @@ def get_rot_equ_axis_lengths(alpha, rho_lim, ρ_tides, ρ_init=1.0001, small_equ
     if final_only:
         ai_list = ai_list[-1]
         ρ_list = ρ_list[-1]
-        mass = [4 / 3 * ρ_list * ai_list[0] * ai_list[1] * ai_list[2]]
+        mass = 4 / 3 * ρ_list * ai_list[0] * ai_list[1] * ai_list[2]
     else:
         mass = [4 / 3 * ρ * a1 * a2 * a3 for ρ, (a1, a2, a3) in zip(ρ_list, ai_list)]
 
