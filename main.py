@@ -1,10 +1,15 @@
-from math import sqrt, pi
-from time import time as current_time
+"""
+Run file
+"""
 import numpy as np
 import matplotlib.pyplot as plt
+from math import sqrt, pi
+from time import time as current_time
 
-from src.utils import ODEIndex, get_BE_equilibrium_radius, get_BE_mass_0to5sqrt5o16, get_BE_mass_1to4_ratio
 from src.data_formats import InitialConditions, ConfigParams
+from src.utils import (ODEIndex, get_BE_equilibrium_radius, get_BE_mass_0to5sqrt5o16, get_BE_mass_1to4_ratio,
+                       get_ai_lengths_chandrasekhar, LengthIndex)
+from src.internal_streaming_equilibria import get_rot_equ_axis_lengths
 from src.solve.solution import solution
 
 ########################################################################################################################
@@ -15,18 +20,53 @@ from src.solve.solution import solution
 #                                                                                                                      #
 ########################################################################################################################
 # System params
-# Specify a ratio for the Bonnor-Ebert mass. e.g. 10% = 0.1
-ratio = 0.9
-ρ_real_over_ρ_tides = 25
-
+# Set system values
+ratio = 0.1                                     # Specify a ratio for the Bonnor-Ebert mass. e.g. 10% = 0.1
+method = "streaming"                            # Specify method for initial conditions.
+# Calculate required values
 ρ_real_over_ρ_pressure = get_BE_mass_1to4_ratio(ratio)
-ρ_pressure_over_ρ_tides = ρ_real_over_ρ_tides/ρ_real_over_ρ_pressure
-mass_r = get_BE_mass_0to5sqrt5o16(ρ_real_over_ρ_pressure)
+
+# ## ### #### ##### ###### ####### manual ####### ###### ##### #### ### ## #
+if method == "manual":
+    # Set system values, Note set manually init_ai
+    ρ_real_over_ρ_tides = 25
+    # Calculate required values
+    ρ_pressure_over_ρ_tides = ρ_real_over_ρ_tides/ρ_real_over_ρ_pressure
+    mass_r = get_BE_mass_0to5sqrt5o16(ρ_real_over_ρ_pressure)
+    _, equ_radius = get_BE_equilibrium_radius(mass_r)
+    if equ_radius == -1:
+        raise SystemExit("No Bonnor-Ebert equilibrium radius was found")
+
+# ## ### #### ##### ###### ####### equilibrium ####### ###### ##### #### ### ## #
+elif method == "equilibrium":
+    # Set system values
+    a3_over_a1_index = 950                      # consult author for information regarding index, R:568, M:462, L:358
+    # Calculate required values
+    ai_lens, mass, ρs = get_ai_lengths_chandrasekhar(a3_over_a1_index=950, specific_ρ=ρ_real_over_ρ_pressure)
+    ρ_real_over_ρ_tides = ρ_real_over_ρ_pressure/ρs[1]
+    ρ_pressure_over_ρ_tides = ρ_real_over_ρ_tides/ρ_real_over_ρ_pressure
+    mass_r = get_BE_mass_0to5sqrt5o16(ρ_real_over_ρ_pressure)
+    equ_radius = 1
+
+# ## ### #### ##### ###### ####### streaming ####### ###### ##### #### ### ## #
+elif method == "streaming":
+    # Set system values, NOTE: init_ϕ_v should be set as "alpha * 1/sqrt(ρ_pressure_over_ρ_tides)"
+    alpha = -0.1                                # Internal streaming rate
+    ρ_pressure_over_ρ_tides = 25                # Choose tidal strength
+    # Calculate required values
+    ai_lens, mass, ρs = get_rot_equ_axis_lengths(alpha, ρ_real_over_ρ_pressure, 1/ρ_pressure_over_ρ_tides)
+    ρ_real_over_ρ_pressure = ρs[0]
+    ρ_real_over_ρ_tides = ρ_real_over_ρ_pressure * ρ_pressure_over_ρ_tides
+    mass_r = get_BE_mass_0to5sqrt5o16(ρ_real_over_ρ_pressure)
+    equ_radius = 1
+
+else:
+    raise SystemExit("No method selected, got {} require manual, equilibrium or streaming")
 
 # Equation initial conditions
-init_a1 = 1.005                                 # Initial a1 axis length of ellipsoid, a1 is usually scaled to 1
-init_a2 = 0.995                                 # Initial a2 axis length
-init_a3 = 1.000                                 # Initial a3 axis length
+init_a1 = ai_lens[LengthIndex.a1]               # Initial a1 axis length of ellipsoid, a1 is usually scaled to 1.005
+init_a2 = ai_lens[LengthIndex.a2]               # Initial a2 axis length, a2 is usually scaled to 0.995
+init_a3 = ai_lens[LengthIndex.a3]               # Initial a3 axis length, a3 is usually scaled to 1.000
 init_θ = 0                                      # Initial θ angle in radians
 init_ϕ = 0                                      # Initial ϕ angle in radians
 init_a1_v = 0                                   # Initial velocity of a1 axis, scaled by equ. radius
@@ -47,9 +87,9 @@ taylor_jump_threshold = 0.005                   # Distance between a1 and a2 axi
 enable_tstop = False                            # Choice to stop the simulation at certain times
 orbital_period = 2 * pi * sqrt(ρ_pressure_over_ρ_tides)
 tstop_times = [orbital_period, orbital_period + orbital_period/100]
-tstop_changes = [{}]                             # When the tstop occurs, choose how you want to alter the system
-                                                 # These values represent multipliers based on original value each
-                                                 # list item is a dictionary
+tstop_changes = [{}]                            # When the tstop occurs, choose how you want to alter the system
+                                                # These values represent multipliers based on original value each
+                                                # list item is a dictionary
 
 save_data = False                                # Would you like to create a hdf5 file with the results?
 folder_name = "solved_odes"                      # Save folder name
@@ -61,10 +101,6 @@ folder_name = "solved_odes"                      # Save folder name
 #                                                                                                                      #
 #                                                                                                                      #
 ########################################################################################################################
-# System values
-_, equ_radius = get_BE_equilibrium_radius(mass_r)
-if equ_radius == -1:
-    raise SystemExit("No proper Bonnor-Ebert equilibrium radius was found")
 # Place the initial conditions and system configuration into their respective data objects
 initial_conditions = InitialConditions(
     ode_init_con=[init_a1 * equ_radius, init_a1_v * equ_radius,
@@ -105,7 +141,7 @@ print("Time taken to compute calculation: " + str(current_time() - sol_start_tim
 #                                                                                                                      #
 #                                                                                                                      #
 ########################################################################################################################
-print("ratios were")
+print("Density ratios were:")
 print("gravity to tides: ", ρ_real_over_ρ_tides)
 print("pressure to tides: ", ρ_pressure_over_ρ_tides)
 print("density to pressure ratio: ", ρ_real_over_ρ_pressure)
