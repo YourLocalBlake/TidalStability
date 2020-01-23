@@ -36,6 +36,22 @@ class ODEIndex(IntEnum):
     # Theta, phi are the same as above.
 
 
+class InitConIndex(IntEnum):
+    """
+    Enumerated number for array index for variables in the initial conditions object.
+    """
+    a1 = 0
+    a1dot = 1
+    a2 = 2
+    a2dot = 3
+    a3 = 4
+    a3dot = 5
+    θ = 6
+    θdot = 7
+    ϕ = 8
+    ϕdot = 9
+
+
 class EllipIndex(IntEnum):
     """
     Enumerated number for array index for variables in the elliptical integrals
@@ -43,6 +59,15 @@ class EllipIndex(IntEnum):
     x = 0
     y = 1
     z = 2
+    a1 = 0
+    a2 = 1
+    a3 = 2
+
+
+class LengthIndex(IntEnum):
+    """
+    Enumerator number for array index for a_i lengths of the ellipsoid
+    """
     a1 = 0
     a2 = 1
     a3 = 2
@@ -83,8 +108,8 @@ def get_BE_equilibrium_radius(mass_r):
         return float(rad_low), float(rad_low)
     try:
         rad_hig = brenth(_eq_rad_dimless, val_range[val_idx] + 1e-10, val_range[-1])
-        print("and at this pressure equilibrium radii of r = {} and {} cm exist.".format(round(rad_low, 10),
-                                                                                          round(rad_hig, 10)),
+        print("and at this pressure equilibrium radii of r = {} and {} exist.".format(round(rad_low, 10),
+                                                                                      round(rad_hig, 10)),
               "\n" + "The root-finding algorithm can temperamental for the larger root, so check they are different")
     except ValueError:
         print("Root finding algorithm could not find a root to the radius equation."
@@ -148,7 +173,7 @@ def get_BE_mass_0to5sqrt5o16(ρ_normalised, override_percentage=-1):
     else:
         print("Solving for a mass cloud of " +
               str(ρ_normalised * sqrt((ρ_normalised - 1)/(3/5 * ρ_normalised**2))**3) +
-              " m_BE, this value goes between 0 and approx 0.69877")
+              " m_BE, this value is highly non-linear and goes between 0 and approx 0.69877")
         return ρ_normalised * sqrt((ρ_normalised - 1)/(3/5 * ρ_normalised**2))**3
 
 
@@ -310,6 +335,7 @@ def get_ai_lengths_chandrasekhar(a3_over_a1_index, specific_ρ):
         ρs = [specific_ρ]
     else:
         raise SystemExit("Old implementation of not requiring a specific_rho was removed.")
+        # todo: reformat function to remove list of rhos, including the for loop below.
 
     a1_lens = []
     a2_lens = []
@@ -334,4 +360,4 @@ def get_ai_lengths_chandrasekhar(a3_over_a1_index, specific_ρ):
         # and the mass
         mass_vals.append(4/3 * current_ρ * a2_over_a1 * a3_over_a1 * a1**3)
 
-    return [a1_lens, a2_lens, a3_lens], mass_vals, [ρ_tidal_vals, mu_vals]
+    return [float(a1_lens[0]), float(a2_lens[0]), float(a3_lens[0])], float(mass_vals[0]), [ρs, ρ_tidal_vals, mu_vals],
