@@ -285,7 +285,7 @@ def get_ai_lengths(alpha, ρ, ρ_tidal, return_only_a1=False):
         return [a1_len, a2_len, a3_len], mass
 
 
-def get_ai_lengths_chandrasekhar(a3_over_a1_index, specific_ρ):
+def get_ai_lengths_chandrasekhar(a3_over_a1_index, specific_ρ, a3_over_a1_list=False, a2_over_a1_list=False):
     """
     Generate the ai lengths for the cloud based on the work by Chandrasekhar. Additionally calculates mass, mu, and
     tidal strength
@@ -327,37 +327,22 @@ def get_ai_lengths_chandrasekhar(a3_over_a1_index, specific_ρ):
                     3 + a3_over_a1 ** 2)
 
     # generate the ratios and select the desired value
-    a3_over_a1_list, a2_over_a1_list, _, _ = axis_length_ratio_solver(0.04, 0.99)
+    if not a3_over_a1_list and not a2_over_a1_list:
+        print("No a3/a1 and/or a2/a1 list provided - Calculating")
+        a3_over_a1_list, a2_over_a1_list, _, _ = axis_length_ratio_solver(0.04, 0.99)
     a3_over_a1 = a3_over_a1_list[a3_over_a1_index]
     a2_over_a1 = a2_over_a1_list[a3_over_a1_index]
 
-    if specific_ρ:
-        ρs = [specific_ρ]
-    else:
-        raise SystemExit("Old implementation of not requiring a specific_rho was removed.")
-        # todo: reformat function to remove list of rhos, including the for loop below.
+    # Calculate mu and rho tides
+    mu_val = _get_Omega_Chan(a2_over_a1, a3_over_a1)  # in units of pi G rho. Explicitly it is mu/(pi G rho)
+    ρ_tidal = (9/(4 * pi) * (pi * specific_ρ) * mu_val)
 
-    a1_lens = []
-    a2_lens = []
-    a3_lens = []
-    mu_vals = []  # Will be given in units of pi G rho. Explicitly it is mu/(pi G rho)
-    mass_vals = []
-    ρ_tidal_vals = []
+    # Calculate the axis lengths
+    a1_len = _calculate_a1_length_chandrasekhar(specific_ρ, ρ_tidal, a2_over_a1, a3_over_a1)
+    a2_len = a2_over_a1 * a1_len
+    a3_len = a3_over_a1 * a1_len
 
-    for current_ρ in ρs:
-        # Calculate mu and rho tides
-        mu_Chan = _get_Omega_Chan(a2_over_a1, a3_over_a1)
-        mu_vals.append(mu_Chan)
-        ρ_tidal = (9/(4 * pi) * (pi * current_ρ) * mu_Chan)
-        ρ_tidal_vals.append(ρ_tidal)
+    # and the mass
+    mass_val = 4/3 * specific_ρ * a2_over_a1 * a3_over_a1 * a1_len**3
 
-        # Calculate the axis lengths
-        a1 = _calculate_a1_length_chandrasekhar(current_ρ, ρ_tidal, a2_over_a1, a3_over_a1)
-        a1_lens.append(a1)
-        a2_lens.append(a2_over_a1 * a1)
-        a3_lens.append(a3_over_a1 * a1)
-
-        # and the mass
-        mass_vals.append(4/3 * current_ρ * a2_over_a1 * a3_over_a1 * a1**3)
-
-    return [float(a1_lens[0]), float(a2_lens[0]), float(a3_lens[0])], float(mass_vals[0]), [ρs, ρ_tidal_vals, mu_vals],
+    return [float(a1_len), float(a2_len), float(a3_len)], float(mass_val), [specific_ρ, ρ_tidal, mu_val],
