@@ -28,7 +28,7 @@ def deriv_xdot_func(*, x, y, z, θ, θdot, ϕdot, A1, ρ_real_over_ρ_pressure, 
             + x**2 * (
                 + θdot * (θdot + 2/sqrt(ρ_pressure_over_ρ_tides))
                 + 3/ρ_pressure_over_ρ_tides * cos(θ)**2
-                - 9/2 * x * y * z * ρ_real_over_ρ_pressure * A1  #  mass_r * A1 * (x*y*z)/(0.6336034966**3)  #
+                - 9/2 * x * y * z * ρ_real_over_ρ_pressure * A1
             )
             + 5 * (1 - 1/ρ_real_over_ρ_pressure)
         )
