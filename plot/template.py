@@ -8,7 +8,7 @@ from src.data_formats import solution_loader            # Load the solution load
 from src.utils import ODEIndex                          # You probably want the ODE index to plot your data
 
 os.chdir("..")                                          # For running files in the plot directory.
-file = "solved_odes/TidalStability_2020-01-28--12-01"   # Relative path and file name
+file = ""                                               # Relative path and file name
 
 # ------------------------------------------------------- DATA ------------------------------------------------------- #
 fig, ax = plt.subplots(1, 1)
@@ -18,5 +18,7 @@ soln, init_con, config_params, internal_data = solution_loader(file_name=file)
 ax.plot(soln.times, soln.solution[:, ODEIndex.a1], label='', color='green')
 ax.plot(soln.times, soln.solution[:, ODEIndex.a2], label='', color='blue')
 ax.plot(soln.times, soln.solution[:, ODEIndex.a3], label='', color='red')
+ax.set_xlabel(r"Time (code unit T)")
+ax.set_ylabel(r"Axis length (code unit L)")
 
 fig.show()
