@@ -6,18 +6,24 @@ import h5py
 from src.data_formats import Solution, InitialConditions, ConfigParams, InternalData
 
 
-def solution_loader(override=False, file_name=None, folder_name="solved_odes"):
+def solution_loader(file_name=None):
     """
     Load a hdf5 file containing a solved ODE
     Returns the 4 data objects
     """
+    if file_name is not None:
+        try:
+            h5py.File(file_name, "r")
+        except OSError:
+            try:
+                file_name = file_name + ".hdf5"
+                h5py.File(file_name, "r")
+            except OSError:
+                raise SystemExit("Could not find file, got {}".format(file_name))
+    else:
+        raise SystemExit("No file given, got {}".format(file_name))
 
-    file = str(folder_name)+"/TidalStability_"+str(file_name)+".hdf5"
-
-    if override:
-        file = override
-
-    with h5py.File(file, "r") as f:
+    with h5py.File(file_name, "r") as f:
         solution = Solution(
             solution=f["solution"]["solution"][:],
             times=f["solution"]["times"][:],
