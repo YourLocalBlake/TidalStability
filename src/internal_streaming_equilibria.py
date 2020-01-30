@@ -3,11 +3,12 @@ Functions related to obtaining the equilibrium starting conditions for ellipsoid
 """
 import numpy as np
 import scipy.optimize as sco
-from math import sqrt, cos
+from math import sqrt
 from enum import IntEnum
 
 from src.solve.geometry import get_Ax, get_Az, get_Ay
 from src.utils import EllipIndex, internal_streaming_axis_length_ratio_solver, get_ai_lengths
+from src.solve.deriv_funcs import deriv_xdot_func, deriv_ydot_func, deriv_zdot_func
 
 
 class VarIndex(IntEnum):
@@ -19,90 +20,74 @@ class VarIndex(IntEnum):
     z = 2
 
 
-# Derivative equations of motion for the ellipsoid
-def deriv_xdot_func(x, y, z, ϕdot, ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides):
-    """
-    Compute the derivative of the derivative of the axis of the ellipsoid
-    """
-    A1 = get_Ax(x=x, y=y, z=z)
-    return 1/x * ( ϕdot * ( + ϕdot * x**2 + 2 * x * y * (+ 1/sqrt(ρ_pressure_over_ρ_tides)))
-                   + x**2 * (
-                        + 3/ρ_pressure_over_ρ_tides
-                        - 9/2 * A1 * x * y * z * ρ_real_over_ρ_pressure
-                    )
-                   + 5 * (1 - 1/ρ_real_over_ρ_pressure)
-    )
-
-
-def deriv_ydot_func(x, y, z, ϕdot, ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides):
-    """
-    Compute the derivative of the derivative of the axis of the ellipsoid ellipsoid
-    """
-    A2 = get_Ay(x=x, y=y, z=z)
-    return 1/y * ( ϕdot * ( + ϕdot * y**2 + 2 * x * y * (+ 1/sqrt(ρ_pressure_over_ρ_tides)))
-                    + y**2 * (
-                        - 9/2 * A2 * x * y * z * ρ_real_over_ρ_pressure
-                    )
-                    + 5 * (1 - 1/ρ_real_over_ρ_pressure)
-    )
-
-
-def deriv_zdot_func(x, y, z, ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides):
-    """
-    Compute the derivative of the derivative of the axis of the ellipsoid
-    """
-    A3 = get_Az(x=x, y=y, z=z)
-    return 1/z * ( - z**2 * ( + 9/2 * A3 * x * y * z * ρ_real_over_ρ_pressure + 1/ρ_pressure_over_ρ_tides)
-                   + 5 * (1 - 1/ρ_real_over_ρ_pressure)
-    )
-
-
 # Derivative equations for the ellipsoid in in vector form
-def deriv_xdot_func_vec(x, ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides, ϕdot, θ=0, θdot=0 ):
+def deriv_xdot_func_vec(vec_input, θ, θdot, ϕdot, A1, ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides):
     """
     Compute the derivative of the derivative of the axis of the ellipsoid
     """
-    A1 = get_Ax(x=x[EllipIndex.x], y=x[EllipIndex.y], z=x[EllipIndex.z])
-
-    val = (1 / x[VarIndex.x] * (ϕdot * (+ ϕdot * x[VarIndex.x] ** 2 + 2 * x[VarIndex.x] * x[VarIndex.y] * (+ θdot + 1 / sqrt(ρ_pressure_over_ρ_tides))
-                             )
-                     + x[VarIndex.x] ** 2 * (+ θdot * (θdot + 2 / sqrt(ρ_pressure_over_ρ_tides))
-                                 + 3 / ρ_pressure_over_ρ_tides * cos(θ) ** 2
-                                 - 9 / 2 * A1 * x[VarIndex.x] * x[VarIndex.y] * x[VarIndex.z] * ρ_real_over_ρ_pressure
-                                 )
-                     + 5 * (1 - 1 / ρ_real_over_ρ_pressure)
-                     ))
-    return val
+    return deriv_xdot_func(x=vec_input[VarIndex.x], y=vec_input[VarIndex.y], z=vec_input[VarIndex.z], A1=A1, θ=θ, θdot=θdot,
+                           ϕdot=ϕdot, ρ_real_over_ρ_pressure=ρ_real_over_ρ_pressure,
+                           ρ_pressure_over_ρ_tides=ρ_pressure_over_ρ_tides)[0]
 
 
-def deriv_ydot_func_vec(x, ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides, ϕdot):
+def deriv_ydot_func_vec(vec_input, θ, θdot, ϕdot, A2, ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides):
     """
     Compute the derivative of the derivative of the axis of the ellipsoid ellipsoid
     """
-    A2 = get_Ay(x=x[EllipIndex.x], y=x[EllipIndex.y], z=x[EllipIndex.z])
-
-    return 1/x[VarIndex.y] * ( ϕdot * ( + ϕdot * x[VarIndex.y]**2 + 2 * x[VarIndex.x] * x[VarIndex.y] * (+ 1/sqrt(ρ_pressure_over_ρ_tides)))
-                    + x[VarIndex.y]**2 * (
-                        - 9/2 * A2 * x[VarIndex.x] * x[VarIndex.y] * x[VarIndex.z] * ρ_real_over_ρ_pressure
-                    )
-                    + 5 * (1 - 1/ρ_real_over_ρ_pressure)
-    )
+    return deriv_ydot_func(x=vec_input[VarIndex.x], y=vec_input[VarIndex.y], z=vec_input[VarIndex.z], A2=A2, θ=θ, θdot=θdot,
+                           ϕdot=ϕdot, ρ_real_over_ρ_pressure=ρ_real_over_ρ_pressure,
+                           ρ_pressure_over_ρ_tides=ρ_pressure_over_ρ_tides)[0]
 
 
-def deriv_zdot_func_vec(x, ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides):
+def deriv_zdot_func_vec(vec_input, A3, ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides):
     """
     Compute the derivative of the derivative of the axis of the ellipsoid
     """
-    A3 = get_Az(x=x[EllipIndex.x], y=x[EllipIndex.y], z=x[EllipIndex.z])
-    return 1/x[VarIndex.z] * ( - x[VarIndex.z]**2 * ( + 9/2 * A3 * x[VarIndex.x] * x[VarIndex.y] * x[VarIndex.z] * ρ_real_over_ρ_pressure + 1/ρ_pressure_over_ρ_tides)
-                   + 5 * (1 - 1/ρ_real_over_ρ_pressure)
-    )
+    return deriv_zdot_func(x=vec_input[VarIndex.x], y=vec_input[VarIndex.y], z=vec_input[VarIndex.z], A3=A3,
+                           ρ_real_over_ρ_pressure=ρ_real_over_ρ_pressure,
+                           ρ_pressure_over_ρ_tides=ρ_pressure_over_ρ_tides)[0]
 
 
 def combined_deriv_eqs(x, ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides, ϕdot):
-    return [deriv_xdot_func_vec(x, ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides, ϕdot),
-            deriv_ydot_func_vec(x, ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides, ϕdot),
-            deriv_zdot_func_vec(x, ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides)]
+    """
+    List of vector form of derivative equations for scipy root
+    """
+    Ai = [
+        get_Ax(x=x[EllipIndex.x], y=x[EllipIndex.y], z=x[EllipIndex.z]),
+        get_Ay(x=x[EllipIndex.x], y=x[EllipIndex.y], z=x[EllipIndex.z]),
+        get_Az(x=x[EllipIndex.x], y=x[EllipIndex.y], z=x[EllipIndex.z])]
+
+    return [
+        deriv_xdot_func_vec(vec_input=x, θ=0, θdot=0, ϕdot=ϕdot, A1=Ai[EllipIndex.x],
+                            ρ_real_over_ρ_pressure=ρ_real_over_ρ_pressure,
+                            ρ_pressure_over_ρ_tides=ρ_pressure_over_ρ_tides),
+        deriv_ydot_func_vec(vec_input=x, θ=0, θdot=0, ϕdot=ϕdot, A2=Ai[EllipIndex.y],
+                            ρ_real_over_ρ_pressure=ρ_real_over_ρ_pressure,
+                            ρ_pressure_over_ρ_tides=ρ_pressure_over_ρ_tides),
+        deriv_zdot_func_vec(vec_input=x, A3=Ai[EllipIndex.z],
+                            ρ_real_over_ρ_pressure=ρ_real_over_ρ_pressure,
+                            ρ_pressure_over_ρ_tides=ρ_pressure_over_ρ_tides),
+
+    ]
+
+
+def combined_deriv_eqs_quad(x, ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides, ϕdot):
+    """
+    Vector form of derivative equations for scipy minimise to minimise the equations in quadrature.
+    """
+    Ai = [
+        get_Ax(x=x[EllipIndex.x], y=x[EllipIndex.y], z=x[EllipIndex.z]),
+        get_Ay(x=x[EllipIndex.x], y=x[EllipIndex.y], z=x[EllipIndex.z]),
+        get_Az(x=x[EllipIndex.x], y=x[EllipIndex.y], z=x[EllipIndex.z])]
+    return deriv_xdot_func_vec(vec_input=x, θ=0, θdot=0, ϕdot=ϕdot, A1=Ai[EllipIndex.x],
+                                ρ_real_over_ρ_pressure=ρ_real_over_ρ_pressure,
+                                ρ_pressure_over_ρ_tides=ρ_pressure_over_ρ_tides)**2 + \
+            deriv_ydot_func_vec(vec_input=x, θ=0, θdot=0, ϕdot=ϕdot, A2=Ai[EllipIndex.y],
+                                ρ_real_over_ρ_pressure=ρ_real_over_ρ_pressure,
+                                ρ_pressure_over_ρ_tides=ρ_pressure_over_ρ_tides)**2+ \
+            deriv_zdot_func_vec(vec_input=x, A3=Ai[EllipIndex.z],
+                                ρ_real_over_ρ_pressure=ρ_real_over_ρ_pressure,
+                                ρ_pressure_over_ρ_tides=ρ_pressure_over_ρ_tides)**2
 
 
 def get_rot_equ_axis_lengths(alpha, rho_lim, ρ_tides, ρ_init=1.0001, small_equ_set=True, final_only=True):
@@ -137,24 +122,30 @@ def get_rot_equ_axis_lengths(alpha, rho_lim, ρ_tides, ρ_init=1.0001, small_equ
     indexs_calculated = 0
     ai_list = []
     ρ_list = []
+    flag_list = []
     # and solve for the first actual length of a1 WHERE GRAVITY IS INCLUDED.
     a1_new = sco.root(fun=combined_deriv_eqs, x0=np.array([a1, a2, a3]),
                       args=(ρ_init, 1 / ρ_tides, ϕdot), method='anderson',
-                      options={"maxiter": 1000, "fatol": 1e-12})
+                      options={"maxiter": 1000, "fatol": 1e-13})
     # append the values to lists
     ai_list.append(a1_new.x)
     ρ_list.append(ρ_init)
+    flag_list.append(a1_new.success)
     indexs_calculated += 1
 
     # Begin solving the system to the desired parameters.
     while True:
 
         a1_new = sco.root(fun=combined_deriv_eqs, x0=a1_new.x, args=(ρ_init, 1 / ρ_tides, ϕdot),
-                          method='hybr',
-                          options={"xtol": 1e-14, "maxfev": 1250})
+                          method='lm',
+                          options={"xtol": 1e-12, "maxfev": 100000, "ftol":1e-12})
+        # a1_new = sco.minimize(fun=combined_deriv_eqs_quad, x0=a1_new.x, args=(ρ_init, 1/ρ_tides, ϕdot), tol=1e-12, method="Nelder-Mead", options={"adaptive":True, "xatol": 1e-12, "maxfev": 100000, "fatol":1e-12})
+        # a1_new = sco.differential_evolution(func=combined_deriv_eqs_quad, bounds=[(0.2, 1), (0.2, 1), (0.2, 1)], args=(ρ_init, 1/ρ_tides, ϕdot), tol=1e-12)
+
         indexs_calculated += 1
         ai_list.append(a1_new.x)
         ρ_list.append(ρ_init)
+        flag_list.append(a1_new.success)
 
         if ρ_init > rho_lim:
             print("All values to limit were calculated")
@@ -178,8 +169,8 @@ def get_rot_equ_axis_lengths(alpha, rho_lim, ρ_tides, ρ_init=1.0001, small_equ
             # Currently we look for solutions with lengths less than 5 - This is tides 0.001. Hence we reset the value
             if a1_new.x[VarIndex.x] > 5:
                 a1_new.x[VarIndex.x] = 0.7
-            if a1_new.x[VarIndex.y] > 5:
-                a1_new.x[VarIndex.y] = 0.7
+            if a1_new.x[VarIndex.y] > 1:
+                a1_new.x[VarIndex.y] = 0.2
             if a1_new.x[VarIndex.z] > 5:
                 a1_new.x[VarIndex.z] = 0.7
 
@@ -214,7 +205,7 @@ def get_rot_equ_axis_lengths(alpha, rho_lim, ρ_tides, ρ_init=1.0001, small_equ
     else:
         mass = [4 / 3 * ρ * a1 * a2 * a3 for ρ, (a1, a2, a3) in zip(ρ_list, ai_list)]
 
-    return ai_list, mass, [ρ_list, indexs_calculated, no_grav_a1]
+    return ai_list, mass, [ρ_list, indexs_calculated, no_grav_a1, flag_list]
 
 
 def index_finder(ρ_list, ρ_wanted):
