@@ -118,3 +118,22 @@ class InternalData:
             ϕdot=concatenate((self.ϕdot, other.ϕdot)),
             problems=self.problems + other.problems,
         )
+
+
+@attr.s
+class SolutionPhysicalUnits:
+    """
+    Datastructure of solutions with physical units
+    """
+    times = attr.ib()
+    solution = attr.ib()
+    ρ_real = attr.ib()
+    ρ_tides = attr.ib()
+    ρ_pressure = attr.ib()
+    ρ_real_over_ρ_tides = attr.ib()
+    ρ_pressure_over_ρ_tides = attr.ib()
+    ρ_real_over_ρ_pressure = attr.ib()
+    mass = attr.ib()
+    len_scale = attr.ib()
+    time_scale = attr.ib()
+    mass_scale = attr.ib()

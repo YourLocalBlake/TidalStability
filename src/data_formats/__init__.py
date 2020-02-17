@@ -3,6 +3,6 @@
 """
 Defines common data structures and how they are to be written to files
 """
-from ._containers import InitialConditions, ConfigParams, Solution, InternalData
+from ._containers import InitialConditions, ConfigParams, Solution, InternalData, SolutionPhysicalUnits
 from ._dumpers import create_results_file
 from ._loaders import solution_loader
