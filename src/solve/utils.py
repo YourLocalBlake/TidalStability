@@ -4,7 +4,7 @@ Useful utilises for the solver.
 
 from numpy import linspace, sign
 
-from src.physics_constants import cG, ckB, cmH
+from src.physics_constants import GRAV, BOLTZMANN, H1MASS
 from src.utils import ODEIndex
 
 
@@ -12,14 +12,15 @@ def get_Ω2(*, dis, mass_bh):
     """
     Compute the angular velocity squared of the cloud around the blackhole.
     """
-    return cG * mass_bh/dis**3
+    # TODO: Move this and cs2 to other utils folder.
+    return GRAV * mass_bh/dis**3
 
 
 def get_cs2(*, temp, mu):
     """
     Compute the sound speed squared
     """
-    return ckB * temp / (mu * cmH)
+    return BOLTZMANN * temp / (mu * H1MASS)
 
 
 def xy_close_stop_generator(target_diff):
