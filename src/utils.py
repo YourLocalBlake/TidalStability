@@ -346,3 +346,228 @@ def get_ai_lengths_chandrasekhar(a3_over_a1_index, specific_ρ, a3_over_a1_list=
     mass_val = 4/3 * specific_ρ * a2_over_a1 * a3_over_a1 * a1_len**3
 
     return [float(a1_len), float(a2_len), float(a3_len)], float(mass_val), [specific_ρ, ρ_tidal, mu_val],
+
+
+def get_physical_scale(solution, times, init_con, temp, pext, l_unit="cm"):
+    """
+    Calculate the physical scale of the cloud based on an input temperature and external pressure
+    :param solution: Solution array
+    :param times: list; list of times corresponding to the solver points
+    :param init_con: InitialConditions object
+    :param temp: int. Temperature in Kelvin
+    :param pext: int: External pressure in Kelvin per cubic centimetre
+    :param l_unit: string: the length unit to use, either pc (parsec), m (metre), or cm (centimetre) if defaulted.
+    :return: SolutionPhysicalUnits: solution class object with physical parameters.
+    """
+
+    from src.solve.utils import get_cs2
+    from src.physics_constants import GRAV, BOLTZMANN
+    from src.data_formats import SolutionPhysicalUnits
+
+    pext = pext * BOLTZMANN  # Convert from Kelvin per cubic centimetre to pascals
+    cs2 = get_cs2(temp=temp, mu=2.33)  # Returns in units of cm^2 s^-2
+
+    len_scale = 3 * cs2 * 1/sqrt(4 * pi * GRAV * pext)       # Returns in units of cm
+    time_scale = 3 * sqrt(cs2/(4 * pi * GRAV * pext))        # Returns in units of seconds
+    mass_scale = 9 * cs2**2/(sqrt(4 * pi * GRAV**3 * pext))  # Returns in units of grams
+
+    if l_unit.lower() == "pc":
+        len_scale = len_scale * 3.240779289e-19
+    if l_unit.lower() == "m":
+        len_scale = len_scale * 0.01
+
+    # give everything its corresponding time scale
+    for index in (ODEIndex.xdot, ODEIndex.ydot, ODEIndex.zdot, ODEIndex.θdot, ODEIndex.ϕdot):
+        solution[:, index] = solution[:, index] / time_scale
+        times[:] = times[:] / time_scale
+    # and length unit
+    for index in (ODEIndex.x, ODEIndex.xdot, ODEIndex.y, ODEIndex.ydot, ODEIndex.z, ODEIndex.zdot):
+        solution[:, index] = solution[:, index] * len_scale
+
+    # todo: pull the densitiy and mass from init con and such.
+
+    mass = init_con.mass_r * 1
+
+
+    # # Calculate the respective densities
+    # soln = SolutionPhysicalUnits(
+    #     times=times,
+    #     solution=solution,
+    #     ρ_real=)
+
+
+
+
+def calculate_solution_planes(x_val, y_val, z_val, θ, θdot, ϕdot, ρ_self, ρ_tides, style="3d", constant_var="x"):
+    """ calculate_solution_planes(0.64838746, 0.36108903, 0.34756538, 0, 0, -0.1/sqrt(ρ_pressure_over_ρ_tides), 1.1181313072462846, 1/4.4, "x")
+    Calculate and plot the solution plane for a constant value and then ranging two other
+    :return:
+    """
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from src.solve.deriv_funcs import deriv_xdot_func, deriv_ydot_func, deriv_zdot_func
+    from src.solve.geometry import get_Ax, get_Ay, get_Az
+    from matplotlib import cm
+    import cmasher as cmr
+    cmap = cmr.iceburn
+    nums = 25
+    up_down_val = 0.01
+    vmin_max_val = 0.01
+    x_range = np.linspace(x_val - up_down_val, x_val + up_down_val, nums)
+    y_range = np.linspace(y_val - up_down_val, y_val + up_down_val, nums)
+    z_range = np.linspace(z_val - up_down_val, z_val + up_down_val, nums)
+
+    if constant_var.lower() == "x":
+        print("IN X")
+        xddot_vals = []
+        yddot_vals = []
+        zddot_vals = []
+        sumofsqs = []
+        for y in y_range:
+            for z in z_range:
+                Ai_vals = [get_Ax(x=x_val, y=y, z=z), get_Ay(x=x_val, y=y, z=z), get_Az(x=x_val, y=y, z=z)]
+                xddot_vals.append(deriv_xdot_func(
+                    x=x_val, y=y, z=z, θ=θ, θdot=θdot, ϕdot=ϕdot, A1=Ai_vals[EllipIndex.x],
+                    ρ_real_over_ρ_pressure=ρ_self, ρ_pressure_over_ρ_tides=1/ρ_tides)[0])
+                yddot_vals.append(deriv_ydot_func(
+                    x=x_val, y=y, z=z, θ=θ, θdot=θdot, ϕdot=ϕdot, A2=Ai_vals[EllipIndex.y],
+                    ρ_real_over_ρ_pressure=ρ_self, ρ_pressure_over_ρ_tides=1/ρ_tides)[0])
+                zddot_vals.append(deriv_zdot_func(
+                    x=x_val, y=y, z=z, A3=Ai_vals[EllipIndex.y],
+                    ρ_real_over_ρ_pressure=ρ_self, ρ_pressure_over_ρ_tides=1/ρ_tides)[0])
+        for (x, y, z) in zip(xddot_vals, yddot_vals, zddot_vals):
+            sumofsqs.append(x**2 + y**2 + z**2)
+        # Plot a 3d grid of the 3 planes
+        from mpl_toolkits.mplot3d import Axes3D
+        # fig = plt.figure()
+        # ax = fig.gca(projection='3d')
+        # need to change the structure of data to plot
+        plot_xddot = np.reshape(xddot_vals, (nums, nums))
+        plot_yddot = np.reshape(yddot_vals, (nums, nums))
+        plot_zddot = np.reshape(zddot_vals, (nums, nums))
+        plot_sumofsqs = np.reshape(sumofsqs, (nums, nums))
+        plot_y, plot_z = np.meshgrid(y_range, z_range)
+
+        # graph_xddot = ax.plot_surface(plot_y, plot_z, plot_xddot, cmap=cm.PuOr, linewidth=0, antialiased=False, vmin=-vmin_max_val, vmax=vmin_max_val)
+        # graph_yddot = ax.plot_surface(plot_y, plot_z, plot_yddot, cmap=cm.PiYG, linewidth=0, antialiased=False, vmin=-vmin_max_val, vmax=vmin_max_val)
+        # graph_zddot = ax.plot_surface(plot_y, plot_z, plot_zddot, cmap=cm.bwr,  linewidth=0, antialiased=False, vmin=-vmin_max_val, vmax=vmin_max_val)
+        # fig.colorbar(graph_xddot, shrink=0.5, aspect=5)
+        # fig.colorbar(graph_yddot, shrink=0.5, aspect=5)
+        # fig.colorbar(graph_zddot, shrink=0.5, aspect=5)
+
+        fig_heatmaps, ((ax1, ax2, ax3), (ax4, ax5, ax6)) = plt.subplots(2, 3, sharey=True, sharex=True)
+        f1 = ax1.imshow(plot_xddot, extent=(y_range[0], y_range[-1], z_range[0], z_range[-1]), vmin=-vmin_max_val, vmax=vmin_max_val, cmap=cmap)
+        f2 = ax2.imshow(plot_yddot, extent=(y_range[0], y_range[-1], z_range[0], z_range[-1]), vmin=-vmin_max_val, vmax=vmin_max_val, cmap=cmap)
+        f3 = ax3.imshow(plot_zddot, extent=(y_range[0], y_range[-1], z_range[0], z_range[-1]), vmin=-vmin_max_val, vmax=vmin_max_val, cmap=cmap)
+        f4 = ax4.imshow(plot_sumofsqs, extent=(y_range[0], y_range[-1], z_range[0], z_range[-1]), vmin=0, vmax=vmin_max_val/2)
+        fig_heatmaps.suptitle("Constant x = {}".format(x_val))
+        ax1.set_xlabel("y value")
+        ax2.set_xlabel("y value")
+        ax3.set_xlabel("y value")
+        ax4.set_xlabel("y value")
+        ax1.set_ylabel("z value")
+        ax4.set_ylabel("z value")
+        ax1.tick_params(top=True, right=True, labelbottom=True, left=True, labelright=False, direction="inout")
+        ax2.tick_params(top=True, right=True, labelbottom=True, left=True, labelright=False, direction="inout")
+        ax3.tick_params(top=True, right=True, labelbottom=True, left=True, labelright=True,  direction="inout")
+        ax4.tick_params(top=True, right=True, labelbottom=True, left=True, labelright=True, direction="inout")
+
+        fig_heatmaps.delaxes(ax5)
+        fig_heatmaps.delaxes(ax6)
+        fig_heatmaps.subplots_adjust(wspace=0, hspace=0)
+        fig_heatmaps.colorbar(f1, aspect=6, cmap=cmap, ax=ax5)
+        fig_heatmaps.colorbar(f4, aspect=6, cmap=cmr.voltage, ax=ax6)
+        ax1.set_title("xddot")
+        ax2.set_title("yddot")
+        ax3.set_title("zddot")
+        ax4.set_title("sum in quad.")
+        plt.show()
+        # todo styles, either planes or heatmap
+
+    elif constant_var.lower() == "y":
+        xddot_vals = []
+        yddot_vals = []
+        zddot_vals = []
+
+        for x in x_range:
+            for z in z_range:
+                Ai_vals = [get_Ax(x=x, y=y_val, z=z), get_Ay(x=x, y=y_val, z=z), get_Az(x=x, y=y_val, z=z)]
+                xddot_vals.append(deriv_xdot_func(
+                    x=x, y=y_val, z=z, θ=θ, θdot=θdot, ϕdot=ϕdot, A1=Ai_vals[EllipIndex.x],
+                    ρ_real_over_ρ_pressure=ρ_self, ρ_pressure_over_ρ_tides=1/ρ_tides)[0])
+                yddot_vals.append(deriv_ydot_func(
+                    x=x, y=y_val, z=z, θ=θ, θdot=θdot, ϕdot=ϕdot, A2=Ai_vals[EllipIndex.y],
+                    ρ_real_over_ρ_pressure=ρ_self, ρ_pressure_over_ρ_tides=1/ρ_tides)[0])
+                zddot_vals.append(deriv_zdot_func(
+                    x=x, y=y_val, z=z, A3=Ai_vals[EllipIndex.y],
+                    ρ_real_over_ρ_pressure=ρ_self, ρ_pressure_over_ρ_tides=1/ρ_tides)[0])
+        # Plot a 3d grid of the 3 planes
+        from mpl_toolkits.mplot3d import Axes3D
+        fig = plt.figure()
+        ax = fig.gca(projection='3d')
+        # need to change the structure of data to plot
+        plot_xddot = np.reshape(xddot_vals, (nums, nums))
+        plot_yddot = np.reshape(yddot_vals, (nums, nums))
+        plot_zddot = np.reshape(zddot_vals, (nums, nums))
+        plot_x, plot_z = np.meshgrid(x_range, z_range)
+
+        graph_xddot = ax.plot_surface(plot_x, plot_z, plot_xddot, cmap=cm.PuOr, linewidth=0, antialiased=False, vmin=-vmin_max_val, vmax=vmin_max_val)
+        graph_yddot = ax.plot_surface(plot_x, plot_z, plot_yddot, cmap=cm.PiYG, linewidth=0, antialiased=False, vmin=-vmin_max_val, vmax=vmin_max_val)
+        graph_zddot = ax.plot_surface(plot_x, plot_z, plot_zddot, cmap=cm.bwr,  linewidth=0, antialiased=False, vmin=-vmin_max_val, vmax=vmin_max_val)
+        fig.colorbar(graph_xddot, shrink=0.5, aspect=5)
+        fig.colorbar(graph_yddot, shrink=0.5, aspect=5)
+        fig.colorbar(graph_zddot, shrink=0.5, aspect=5)
+        plt.title("Constant y = {}".format(y_val))
+        plt.xlabel("x value")
+        plt.ylabel("z value")
+        ax.set_zlabel("ddot value")
+        plt.show()
+
+    elif constant_var.lower() == "z":
+        xddot_vals = []
+        yddot_vals = []
+        zddot_vals = []
+
+        for x in x_range:
+            for y in y_range:
+                Ai_vals = [get_Ax(x=x, y=y, z=z_val), get_Ay(x=x, y=y, z=z_val), get_Az(x=x, y=y, z=z_val)]
+                xddot_vals.append(deriv_xdot_func(
+                    x=x, y=y, z=z_val, θ=θ, θdot=θdot, ϕdot=ϕdot, A1=Ai_vals[EllipIndex.x],
+                    ρ_real_over_ρ_pressure=ρ_self, ρ_pressure_over_ρ_tides=1/ρ_tides)[0])
+                yddot_vals.append(deriv_ydot_func(
+                    x=x, y=y, z=z_val, θ=θ, θdot=θdot, ϕdot=ϕdot, A2=Ai_vals[EllipIndex.y],
+                    ρ_real_over_ρ_pressure=ρ_self, ρ_pressure_over_ρ_tides=1/ρ_tides)[0])
+                zddot_vals.append(deriv_zdot_func(
+                    x=x, y=y, z=z_val, A3=Ai_vals[EllipIndex.y],
+                    ρ_real_over_ρ_pressure=ρ_self, ρ_pressure_over_ρ_tides=1/ρ_tides)[0])
+
+        # Plot a 3d grid of the 3 planes
+        from mpl_toolkits.mplot3d import Axes3D
+        fig = plt.figure()
+        ax = fig.gca(projection='3d')
+        # need to change the structure of data to plot
+        plot_xddot = np.reshape(xddot_vals, (nums, nums))
+        plot_yddot = np.reshape(yddot_vals, (nums, nums))
+        plot_zddot = np.reshape(zddot_vals, (nums, nums))
+        plot_x, plot_y = np.meshgrid(x_range, y_range)
+
+        graph_xddot = ax.plot_surface(plot_x, plot_y, plot_xddot, cmap=cm.PuOr, linewidth=0, antialiased=False, vmin=-vmin_max_val, vmax=vmin_max_val)
+        graph_yddot = ax.plot_surface(plot_x, plot_y, plot_yddot, cmap=cm.PiYG, linewidth=0, antialiased=False, vmin=-vmin_max_val, vmax=vmin_max_val)
+        graph_zddot = ax.plot_surface(plot_x, plot_y, plot_zddot, cmap=cm.bwr,  linewidth=0, antialiased=False, vmin=-vmin_max_val, vmax=vmin_max_val)
+        fig.colorbar(graph_xddot, shrink=0.5, aspect=5)
+        fig.colorbar(graph_yddot, shrink=0.5, aspect=5)
+        fig.colorbar(graph_zddot, shrink=0.5, aspect=5)
+        plt.title("Constant z = {}".format(z_val))
+        plt.xlabel("x value")
+        plt.ylabel("y value")
+        ax.set_zlabel("ddot value")
+        plt.show()
+
+    else:
+        raise SystemExit("Incorrect variable selected, got {}, expected x, y, or z".format(constant_var))
+
+    # fig, ax = plt.subplot(1, 3)
+    # calculate_solution_planes(0.5, 0.5, 0.5, 0, 0, -0.1, 1.18, 0.01, "x")
+
+
+
