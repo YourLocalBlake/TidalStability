@@ -26,19 +26,25 @@ ai_lens, mass, ρs = get_rot_equ_axis_lengths(alpha, ρ_real_over_ρ_pressure, 1
 from src.utils import calculate_solution_planes
 calculate_solution_planes(ai_lens[0], ai_lens[1], ai_lens[2], 0, 0,
                           alpha/sqrt(ρ_pressure_over_ρ_tides),
-                          ρ_real_over_ρ_pressure,
+                          ρs[0], # ρ_real_over_ρ_pressure,
                           1/ρ_pressure_over_ρ_tides,
+                          style_heat=True,
+                          log_scale=True,
                           constant_var="x")
-# calculate_solution_planes(ai_lens[0], ai_lens[1], ai_lens[2], 0, 0,
-#                           alpha/sqrt(ρ_pressure_over_ρ_tides),
-#                           ρ_real_over_ρ_pressure,
-#                           1/ρ_pressure_over_ρ_tides,
-#                           "y")
-# calculate_solution_planes(ai_lens[0], ai_lens[1], ai_lens[2], 0, 0,
-#                           alpha/sqrt(ρ_pressure_over_ρ_tides),
-#                           ρ_real_over_ρ_pressure,
-#                           1/ρ_pressure_over_ρ_tides,
-#                           "z")
+calculate_solution_planes(ai_lens[0], ai_lens[1], ai_lens[2], 0, 0,
+                          alpha/sqrt(ρ_pressure_over_ρ_tides),
+                          ρs[0],
+                          1/ρ_pressure_over_ρ_tides,
+                          style_heat=True,
+                          log_scale=True,
+                          constant_var="y")
+calculate_solution_planes(ai_lens[0], ai_lens[1], ai_lens[2], 0, 0,
+                          alpha/sqrt(ρ_pressure_over_ρ_tides),
+                          ρs[0],
+                          1/ρ_pressure_over_ρ_tides,
+                          style_heat=True,
+                          log_scale=True,
+                          constant_var="z")
 ### plotting ai lens
 a1_lens = []
 a2_lens = []
