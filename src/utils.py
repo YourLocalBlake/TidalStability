@@ -412,8 +412,8 @@ def calculate_solution_planes(x_val, y_val, z_val, θ, θdot, ϕdot, ρ_self, ρ
     import cmasher as cmr
     cmap = cmr.iceburn
     nums = 100
-    up_down_val = 0.05
-    vmin_max_val = 0.05
+    up_down_val = 0.03
+    vmin_max_val = 0.03
     x_range = np.linspace(x_val - up_down_val, x_val + up_down_val, nums)
     y_range = np.linspace(y_val - up_down_val, y_val + up_down_val, nums)
     z_range = np.linspace(z_val - up_down_val, z_val + up_down_val, nums)
@@ -459,7 +459,7 @@ def calculate_solution_planes(x_val, y_val, z_val, θ, θdot, ϕdot, ρ_self, ρ
             f2 = ax2.imshow(plot_yddot, extent=(y_range[0], y_range[-1], z_range[0], z_range[-1]) , vmin=min_plot, vmax=max_plot, cmap=cmap)
             f3 = ax3.imshow(plot_zddot, extent=(y_range[0], y_range[-1], z_range[0], z_range[-1]) , vmin=min_plot, vmax=max_plot, cmap=cmap)
             f4 = ax4.imshow(plot_sumofsqs, extent=(y_range[0], y_range[-1], z_range[0], z_range[-1]) , vmin=np.min(plot_sumofsqs), vmax=np.max(plot_sumofsqs))
-            fig_heatmaps.suptitle("Constant x = {}".format(x_val))
+            fig_heatmaps.suptitle("Constant x = {}, alpha = {}".format(x_val, ϕdot*sqrt(1/ρ_tides)))
             ax1.set_xlabel("y value")
             ax2.set_xlabel("y value")
             ax3.set_xlabel("y value")
@@ -498,7 +498,7 @@ def calculate_solution_planes(x_val, y_val, z_val, θ, θdot, ϕdot, ρ_self, ρ
             fig.colorbar(graph_yddot, shrink=0.5, aspect=5)
             fig.colorbar(graph_zddot, shrink=0.5, aspect=5)
 
-            plt.title("Constant x = {}".format(x_val))
+            plt.title("Constant x = {}, alpha = {}".format(x_val, ϕdot*sqrt(1/ρ_tides)))
             plt.xlabel("y value")
             plt.ylabel("z value")
             ax.set_zlabel("ddot value")
@@ -547,7 +547,7 @@ def calculate_solution_planes(x_val, y_val, z_val, θ, θdot, ϕdot, ρ_self, ρ
             f2 = ax2.imshow(plot_yddot, extent=(x_range[0], x_range[-1], z_range[0], z_range[-1]) , vmin=min_plot, vmax=max_plot, cmap=cmap)
             f3 = ax3.imshow(plot_zddot, extent=(x_range[0], x_range[-1], z_range[0], z_range[-1]) , vmin=min_plot, vmax=max_plot, cmap=cmap)
             f4 = ax4.imshow(plot_sumofsqs, extent=(x_range[0], x_range[-1], z_range[0], z_range[-1]) , vmin=np.min(plot_sumofsqs), vmax=np.max(plot_sumofsqs))
-            fig_heatmaps.suptitle("Constant y = {}".format(y_val))
+            fig_heatmaps.suptitle("Constant y = {}, alpha = {}".format(y_val, ϕdot*sqrt(1/ρ_tides)))
             ax1.set_xlabel("x value")
             ax2.set_xlabel("x value")
             ax3.set_xlabel("x value")
@@ -587,7 +587,7 @@ def calculate_solution_planes(x_val, y_val, z_val, θ, θdot, ϕdot, ρ_self, ρ
             fig.colorbar(graph_yddot, shrink=0.5, aspect=5)
             fig.colorbar(graph_zddot, shrink=0.5, aspect=5)
 
-            plt.title("Constant y = {}".format(y_val))
+            plt.title("Constant y = {}, alpha = {}".format(y_val, ϕdot*sqrt(1/ρ_tides)))
             plt.xlabel("x value")
             plt.ylabel("z value")
             ax.set_zlabel("ddot value")
@@ -633,7 +633,7 @@ def calculate_solution_planes(x_val, y_val, z_val, θ, θdot, ϕdot, ρ_self, ρ
             f2 = ax2.imshow(plot_yddot, extent=(x_range[0], x_range[-1], y_range[0], y_range[-1]) , vmin=min_plot, vmax=max_plot, cmap=cmap)
             f3 = ax3.imshow(plot_zddot, extent=(x_range[0], x_range[-1], y_range[0], y_range[-1]) , vmin=min_plot, vmax=max_plot, cmap=cmap)
             f4 = ax4.imshow(plot_sumofsqs, extent=(x_range[0], x_range[-1], y_range[0], y_range[-1]) , vmin=np.min(plot_sumofsqs), vmax=np.max(plot_sumofsqs))
-            fig_heatmaps.suptitle("Constant z = {}".format(z_val))
+            fig_heatmaps.suptitle("Constant z = {}, alpha = {}".format(z_val, ϕdot*sqrt(1/ρ_tides)))
             ax1.set_xlabel("x value")
             ax2.set_xlabel("x value")
             ax3.set_xlabel("x value")
@@ -673,7 +673,7 @@ def calculate_solution_planes(x_val, y_val, z_val, θ, θdot, ϕdot, ρ_self, ρ
             fig.colorbar(graph_yddot, shrink=0.5, aspect=5)
             fig.colorbar(graph_zddot, shrink=0.5, aspect=5)
 
-            plt.title("Constant z = {}".format(z_val))
+            plt.title("Constant z = {}, alpha = {}".format(z_val, ϕdot*sqrt(1/ρ_tides)))
             plt.xlabel("x value")
             plt.ylabel("y value")
             ax.set_zlabel("ddot value")
