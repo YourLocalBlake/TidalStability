@@ -682,8 +682,87 @@ def calculate_solution_planes(x_val, y_val, z_val, θ, θdot, ϕdot, ρ_self, ρ
     else:
         raise SystemExit("Incorrect variable selected, got {}, expected x, y, or z".format(constant_var))
 
-    # fig, ax = plt.subplot(1, 3)
-    # calculate_solution_planes(0.5, 0.5, 0.5, 0, 0, -0.1, 1.18, 0.01, "x")
+
+def calculate_solution_cube(x_val, y_val, z_val, θ, θdot, ϕdot, ρ_self, ρ_tides):
+    """
+    Create a 3d fits image which contains the varying values in all axes.
+    :return:
+    """
+    from time import time
+    t1 = time()
+    import numpy as np
+    from src.solve.deriv_funcs import deriv_xdot_func, deriv_ydot_func, deriv_zdot_func
+    from src.solve.geometry import get_Ax, get_Ay, get_Az
+    from astropy.io import fits
+    nums = 75
+    up_down_val = 0.1
+    x_range = np.linspace(x_val - up_down_val, x_val + up_down_val, nums)
+    y_range = np.linspace(y_val - up_down_val, y_val + up_down_val, nums)
+    z_range = np.linspace(z_val - up_down_val, z_val + up_down_val, nums)
+
+    cube_slice_x = []
+    cube_slice_y = []
+    cube_slice_z = []
+    sum_slice = []
+
+    for x in x_range:
+        xddot_vals = []
+        yddot_vals = []
+        zddot_vals = []
+        sumofsqs = []
+        for y in y_range:
+            for z in z_range:
+                Ai_vals = [get_Ax(x=x, y=y, z=z), get_Ay(x=x, y=y, z=z), get_Az(x=x, y=y, z=z)]
+                xddot_vals.append(deriv_xdot_func(
+                    x=x, y=y, z=z, θ=θ, θdot=θdot, ϕdot=ϕdot, A1=Ai_vals[EllipIndex.x],
+                    ρ_real_over_ρ_pressure=ρ_self, ρ_pressure_over_ρ_tides=1 / ρ_tides)[0])
+                yddot_vals.append(deriv_ydot_func(
+                    x=x, y=y, z=z, θ=θ, θdot=θdot, ϕdot=ϕdot, A2=Ai_vals[EllipIndex.y],
+                    ρ_real_over_ρ_pressure=ρ_self, ρ_pressure_over_ρ_tides=1 / ρ_tides)[0])
+                zddot_vals.append(deriv_zdot_func(
+                    x=x, y=y, z=z, A3=Ai_vals[EllipIndex.z],
+                    ρ_real_over_ρ_pressure=ρ_self, ρ_pressure_over_ρ_tides=1 / ρ_tides)[0])
+        for (x, y, z) in zip(xddot_vals, yddot_vals, zddot_vals):
+            sumofsqs.append(x ** 2 + y ** 2 + z ** 2)
+
+        cube_slice_x.append(np.log10(np.abs(np.flipud(np.reshape(xddot_vals, (nums, nums)).T))))
+        cube_slice_y.append(np.log10(np.abs(np.flipud(np.reshape(yddot_vals, (nums, nums)).T))))
+        cube_slice_z.append(np.log10(np.abs(np.flipud(np.reshape(zddot_vals, (nums, nums)).T))))
+        sum_slice.append(np.flipud(np.reshape(sumofsqs, (nums, nums)).T))
+
+    hdux = fits.PrimaryHDU(cube_slice_x)
+    hdux.writeto("100nums_40pt_1_x.fits")
+    hduy = fits.PrimaryHDU(cube_slice_y)
+    hduy.writeto("100nums_40pt_1_y.fits")
+    hduz = fits.PrimaryHDU(cube_slice_z)
+    hduz.writeto("100nums_40pt_1_z.fits")
+    hdu2 = fits.PrimaryHDU(sum_slice)
+    hdu2.writeto("100nums_40pt_1_sum_of_sqs.fits")
+    print("time takenw as ", time() - t1)
 
 
+def eq_root_para_graph(x_val, y_val, z_val, θ, θdot, ϕdot, ρ_self, ρ_tides):
+    """
+    Creates the graph for root parametrisation.
+    :return:
+    """
+    # so we can solve yddot and zddot for their roots with a given x value.
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from src.solve.deriv_funcs import deriv_xdot_func
+    nums = 1000
+    up_down_val = 5
+    x_range = np.linspace(0.1, x_val + up_down_val, nums)
 
+    xddot_vals = []
+    for x in x_range:
+        Ai_vals = [get_Ax(x=x, y=y_val, z=z_val), get_Ay(x=x, y=y_val, z=z_val), get_Az(x=x, y=y_val, z=z_val)]
+        xddot_vals.append(deriv_xdot_func(
+            x=x, y=y_val, z=z_val, θ=θ, θdot=θdot, ϕdot=ϕdot, A1=Ai_vals[EllipIndex.x],
+            ρ_real_over_ρ_pressure=ρ_self, ρ_pressure_over_ρ_tides=1 / ρ_tides)[0])
+
+    plt.plot(x_range, xddot_vals)
+    plt.xlabel("x val (code unit)")
+    plt.ylabel("value (code unit(")
+    plt.axhline(y=0, color='black', ls='--')
+    plt.show()

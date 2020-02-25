@@ -5,7 +5,7 @@ from time import time as current_time
 
 from src.data_formats import InitialConditions, ConfigParams
 from src.utils import (ODEIndex, get_BE_mass_0to5sqrt5o16, get_BE_mass_1to4_ratio,
-                       LengthIndex)
+                       LengthIndex, eq_root_para_graph)
 from src.internal_streaming_equilibria import get_rot_equ_axis_lengths
 from src.solve.solution import solution
 
@@ -17,34 +17,44 @@ ratio = 0.1                                     # Specify a ratio for the Bonnor
 ρ_real_over_ρ_pressure = get_BE_mass_1to4_ratio(ratio)
 
 # Set system values, NOTE: init_ϕ_v should be set as "alpha/sqrt(ρ_pressure_over_ρ_tides)"
-alpha = -0.1  # Internal streaming rate
-ρ_pressure_over_ρ_tides = 4.4  # Choose tidal strength
+alpha = -0.2  # Internal streaming rate  0.2 is good for p/t of 4 - cloest I have so far I think.
+ρ_pressure_over_ρ_tides = 25  # Choose tidal strength
 # Calculate required values
 print("In, r/p = {}, p/t={}".format(ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides))
 ai_lens, mass, ρs = get_rot_equ_axis_lengths(alpha, ρ_real_over_ρ_pressure, 1 / ρ_pressure_over_ρ_tides, final_only=True)
 
-from src.utils import calculate_solution_planes
-calculate_solution_planes(ai_lens[0], ai_lens[1], ai_lens[2], 0, 0,
-                          alpha/sqrt(ρ_pressure_over_ρ_tides),
-                          ρs[0], # ρ_real_over_ρ_pressure,
-                          1/ρ_pressure_over_ρ_tides,
-                          style_heat=True,
-                          log_scale=True,
-                          constant_var="x")
-calculate_solution_planes(ai_lens[0], ai_lens[1], ai_lens[2], 0, 0,
+from src.utils import calculate_solution_planes, calculate_solution_cube
+# calculate_solution_planes(ai_lens[0], ai_lens[1], ai_lens[2], 0, 0,
+#                           alpha/sqrt(ρ_pressure_over_ρ_tides),
+#                           ρs[0], # ρ_real_over_ρ_pressure,
+#                           1/ρ_pressure_over_ρ_tides,
+#                           style_heat=True,
+#                           log_scale=True,
+#                           constant_var="x")
+# calculate_solution_planes(ai_lens[0], ai_lens[1], ai_lens[2], 0, 0,
+#                           alpha/sqrt(ρ_pressure_over_ρ_tides),
+#                           ρs[0],
+#                           1/ρ_pressure_over_ρ_tides,
+#                           style_heat=True,
+#                           log_scale=True,
+#                           constant_var="y")
+# calculate_solution_planes(ai_lens[0], ai_lens[1], ai_lens[2], 0, 0,
+#                           alpha/sqrt(ρ_pressure_over_ρ_tides),
+#                           ρs[0],
+#                           1/ρ_pressure_over_ρ_tides,
+#                           style_heat=True,
+#                           log_scale=True,
+#                           constant_var="z")
+
+# calculate_solution_cube(ai_lens[0], ai_lens[1], ai_lens[2], 0, 0,
+#                           alpha/sqrt(ρ_pressure_over_ρ_tides),
+#                           ρs[0],
+#                           1/ρ_pressure_over_ρ_tides)
+
+eq_root_para_graph(ai_lens[0], ai_lens[1], ai_lens[2], 0, 0,
                           alpha/sqrt(ρ_pressure_over_ρ_tides),
                           ρs[0],
-                          1/ρ_pressure_over_ρ_tides,
-                          style_heat=True,
-                          log_scale=True,
-                          constant_var="y")
-calculate_solution_planes(ai_lens[0], ai_lens[1], ai_lens[2], 0, 0,
-                          alpha/sqrt(ρ_pressure_over_ρ_tides),
-                          ρs[0],
-                          1/ρ_pressure_over_ρ_tides,
-                          style_heat=True,
-                          log_scale=True,
-                          constant_var="z")
+                          1/ρ_pressure_over_ρ_tides)
 ### plotting ai lens
 a1_lens = []
 a2_lens = []
