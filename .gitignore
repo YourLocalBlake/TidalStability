@@ -3,3 +3,4 @@
 *.iml
 *.hdf5
 solved_odes/
+*.fits
