@@ -67,7 +67,11 @@ class EllipIndex(IntEnum):
 class LengthIndex(IntEnum):
     """
     Enumerator number for array index for a_i lengths of the ellipsoid
+    Identical to EllipIndex, most exist for better readability in code.
     """
+    x = 0
+    y = 1
+    z = 2
     a1 = 0
     a2 = 1
     a3 = 2
@@ -750,19 +754,41 @@ def eq_root_para_graph(x_val, y_val, z_val, θ, θdot, ϕdot, ρ_self, ρ_tides)
     import numpy as np
     import matplotlib.pyplot as plt
     from src.solve.deriv_funcs import deriv_xdot_func
+    from src.internal_streaming_equilibria import get_rot_equ_axis_single_val
     nums = 1000
     up_down_val = 5
-    x_range = np.linspace(0.1, x_val + up_down_val, nums)
-
+    x_range = np.linspace(0.11, x_val + up_down_val, nums)
+    ay_plots = []
+    az_plots = []
     xddot_vals = []
     for x in x_range:
-        Ai_vals = [get_Ax(x=x, y=y_val, z=z_val), get_Ay(x=x, y=y_val, z=z_val), get_Az(x=x, y=y_val, z=z_val)]
+        # we pick an x value, we then want to set this value to be constant, and solve y(x) and z(x) which are found
+        # through solving the ddot equations. then we plot these.
+
+        # firstly load and solve the other equations
+        ai_lens = get_rot_equ_axis_single_val(x, y_val, z_val, ϕdot=ϕdot, ρ=ρ_self, ρ_tides=ρ_tides, const_var="x")
+        print("ai lens", ai_lens)
+        ay_plots.append(ai_lens[LengthIndex.y])
+        az_plots.append(ai_lens[LengthIndex.z])
+        # then with these values solve the new stuff.
+        Ai_vals = [get_Ax(x=ai_lens[LengthIndex.x], y=ai_lens[LengthIndex.y], z=ai_lens[LengthIndex.z]),
+                   get_Ay(x=ai_lens[LengthIndex.x], y=ai_lens[LengthIndex.y], z=ai_lens[LengthIndex.z]),
+                   get_Az(x=ai_lens[LengthIndex.x], y=ai_lens[LengthIndex.y], z=ai_lens[LengthIndex.z])]
         xddot_vals.append(deriv_xdot_func(
-            x=x, y=y_val, z=z_val, θ=θ, θdot=θdot, ϕdot=ϕdot, A1=Ai_vals[EllipIndex.x],
+            x=ai_lens[LengthIndex.x], y=ai_lens[LengthIndex.y], z=ai_lens[LengthIndex.z], θ=θ, θdot=θdot, ϕdot=ϕdot, A1=Ai_vals[EllipIndex.x],
             ρ_real_over_ρ_pressure=ρ_self, ρ_pressure_over_ρ_tides=1 / ρ_tides)[0])
 
-    plt.plot(x_range, xddot_vals)
+        # old func.
+        # Ai_vals = [get_Ax(x=x, y=y_val, z=z_val), get_Ay(x=x, y=y_val, z=z_val), get_Az(x=x, y=y_val, z=z_val)]
+        # xddot_vals.append(deriv_xdot_func(
+        #     x=x, y=y_val, z=z_val, θ=θ, θdot=θdot, ϕdot=ϕdot, A1=Ai_vals[EllipIndex.x],
+        #     ρ_real_over_ρ_pressure=ρ_self, ρ_pressure_over_ρ_tides=1 / ρ_tides)[0])
+
+    plt.plot(x_range, xddot_vals, color='blue')
+    plt.plot(x_range, ay_plots, color='black')
+    plt.plot(x_range, az_plots, color='red')
+    plt.ylim(-1, 2.5)
     plt.xlabel("x val (code unit)")
-    plt.ylabel("value (code unit(")
+    plt.ylabel("value (code unit)")
     plt.axhline(y=0, color='black', ls='--')
     plt.show()
