@@ -49,10 +49,20 @@ def deriv_zdot_func_vec(vec_input, A3, ρ_real_over_ρ_pressure, ρ_pressure_ove
                            ρ_pressure_over_ρ_tides=ρ_pressure_over_ρ_tides)[0]
 
 
-def combined_deriv_eqs(x, ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides, ϕdot):
+def combined_deriv_eqs(x, ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides, ϕdot, override_x=None, override_y=None, override_z=None):
     """
     List of vector form of derivative equations for scipy root
     """
+    if override_x:
+        print("got x override of {}".format(override_x))
+        x[VarIndex.x] = override_x
+    if override_y:
+        print("got y override of {}".format(override_y))
+        x[VarIndex.y] = override_y
+    if override_z:
+        print("got z override of {}".format(override_z))
+        x[VarIndex.z] = override_z
+
     Ai = [
         get_Ax(x=x[VarIndex.x], y=x[VarIndex.y], z=x[VarIndex.z]),
         get_Ay(x=x[VarIndex.x], y=x[VarIndex.y], z=x[VarIndex.z]),
@@ -134,6 +144,7 @@ def get_rot_equ_axis_lengths(alpha, rho_lim, ρ_tides, ρ_init=1.0001, small_equ
 
     # Begin solving the system to the desired parameters.
     while True:
+        print("a1 in is", a1_new.x)
         a1_new = sco.root(fun=combined_deriv_eqs, x0=a1_new.x, args=(ρ_init, 1/ρ_tides, ϕdot),
                           method='lm',
                           options={"xtol": 1e-12, "maxfev": 100000, "ftol": 1e-5, "maxiter": 25000})
@@ -143,6 +154,16 @@ def get_rot_equ_axis_lengths(alpha, rho_lim, ρ_tides, ρ_init=1.0001, small_equ
         ai_list.append(a1_new.x)
         ρ_list.append(ρ_init)
         flag_list.append(a1_new.success)
+        print("suc?, mes", a1_new.success, a1_new.message)
+        print("a1 out", a1_new.x)
+        print("vals are ", )
+        Ai = [
+        get_Ax(x=a1_new.x[VarIndex.x], y=a1_new.x[VarIndex.y], z=a1_new.x[VarIndex.z]),
+        get_Ay(x=a1_new.x[VarIndex.x], y=a1_new.x[VarIndex.y], z=a1_new.x[VarIndex.z]),
+        get_Az(x=a1_new.x[VarIndex.x], y=a1_new.x[VarIndex.y], z=a1_new.x[VarIndex.z])]
+        print("x", deriv_xdot_func_vec(vec_input=a1_new.x, θ=0, θdot=0, ϕdot=ϕdot, A1=Ai[0], ρ_real_over_ρ_pressure=ρ_init, ρ_pressure_over_ρ_tides=1/ρ_tides))
+        print("y", deriv_ydot_func_vec(vec_input=a1_new.x, θ=0, θdot=0, ϕdot=ϕdot, A2=Ai[1], ρ_real_over_ρ_pressure=ρ_init, ρ_pressure_over_ρ_tides=1/ρ_tides))
+        print("z", deriv_zdot_func_vec(vec_input=a1_new.x, A3=Ai[2], ρ_real_over_ρ_pressure=ρ_init, ρ_pressure_over_ρ_tides=1/ρ_tides))
 
         if ρ_init > rho_lim:
             print("All values to limit were calculated")
@@ -215,3 +236,33 @@ def index_finder(ρ_list, ρ_wanted):
             except IndexError:
                 print("next rho val is outside of list")
                 return -1
+
+
+def get_rot_equ_axis_single_val(x_val, y_val, z_val, ϕdot, ρ, ρ_tides, const_var="x"):
+    """given a x (or y, or z) value (additionally with i.e. theta vars) solve the three ddot equations for the
+    equilibrium position based on the input value.
+    """
+    import scipy.optimize as sco
+
+    if const_var == "x":
+        ai_new = sco.root(fun=combined_deriv_eqs, x0=np.array([x_val, y_val, z_val]),
+                          args=(ρ, 1/ρ_tides, ϕdot, x_val), method='lm',
+                          options={"xtol": 1e-12, "maxfev": 100000, "ftol": 1e-5, "maxiter": 25000})
+    elif const_var == "y":
+        ai_new = sco.root(fun=combined_deriv_eqs, x0=np.array([x_val, y_val, z_val]),
+                          args=(ρ, 1/ρ_tides, ϕdot, None, y_val), method='lm',
+                          options={"xtol": 1e-12, "maxfev": 100000, "ftol": 1e-5, "maxiter": 25000})
+    elif const_var == "z":
+        ai_new = sco.root(fun=combined_deriv_eqs, x0=np.array([x_val, y_val, z_val]),
+                          args=(ρ, 1/ρ_tides, ϕdot, None, None, z_val), method='lm',
+                          options={"xtol": 1e-12, "maxfev": 100000, "ftol": 1e-5, "maxiter": 25000})
+    else:
+        raise SystemExit("constant_var in get_rot_equ_axis_single_val overrided with incompatiable value.")
+
+    for i in ai_new.x:
+        if i <= 0:
+            print("NEGATIVE AXIS LENGTHS RETURNED IN get_rot_equ_axis_single_val")
+
+    print("suc?, mes", ai_new.success, ai_new.message)
+    print("a1 out", ai_new.x)
+    return ai_new.x
