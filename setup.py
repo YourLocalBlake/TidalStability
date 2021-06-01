@@ -18,7 +18,7 @@ setuptools.setup(
         "numpy>=1.19.2",
         "scikits.odes==2.6.1",
         "scipy>=1.5.2",
-        "sundials==5.4.0",
+        "python-sundials==5.4.0",
     ],
     #python_requires = '>=3.5',
     author = u"Blake Staples",
