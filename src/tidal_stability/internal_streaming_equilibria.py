@@ -5,6 +5,7 @@ import numpy as np
 import scipy.optimize as sco
 from math import sqrt
 from enum import IntEnum
+import mpmath as mp
 
 from src.solve.geometry import get_Ax, get_Az, get_Ay
 from src.utils import EllipIndex, internal_streaming_axis_length_ratio_solver, get_ai_lengths
@@ -53,9 +54,9 @@ def combined_deriv_eqs(x, ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides, �
     List of vector form of derivative equations for scipy root
     """
     Ai = [
-        get_Ax(x=x[EllipIndex.x], y=x[EllipIndex.y], z=x[EllipIndex.z]),
-        get_Ay(x=x[EllipIndex.x], y=x[EllipIndex.y], z=x[EllipIndex.z]),
-        get_Az(x=x[EllipIndex.x], y=x[EllipIndex.y], z=x[EllipIndex.z])]
+        get_Ax(x=x[VarIndex.x], y=x[VarIndex.y], z=x[VarIndex.z]),
+        get_Ay(x=x[VarIndex.x], y=x[VarIndex.y], z=x[VarIndex.z]),
+        get_Az(x=x[VarIndex.x], y=x[VarIndex.y], z=x[VarIndex.z])]
 
     return [
         deriv_xdot_func_vec(vec_input=x, θ=0, θdot=0, ϕdot=ϕdot, A1=Ai[EllipIndex.x],
@@ -66,8 +67,7 @@ def combined_deriv_eqs(x, ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides, �
                             ρ_pressure_over_ρ_tides=ρ_pressure_over_ρ_tides),
         deriv_zdot_func_vec(vec_input=x, A3=Ai[EllipIndex.z],
                             ρ_real_over_ρ_pressure=ρ_real_over_ρ_pressure,
-                            ρ_pressure_over_ρ_tides=ρ_pressure_over_ρ_tides),
-
+                            ρ_pressure_over_ρ_tides=ρ_pressure_over_ρ_tides)
     ]
 
 
@@ -76,15 +76,15 @@ def combined_deriv_eqs_quad(x, ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tid
     Vector form of derivative equations for scipy minimise to minimise the equations in quadrature.
     """
     Ai = [
-        get_Ax(x=x[EllipIndex.x], y=x[EllipIndex.y], z=x[EllipIndex.z]),
-        get_Ay(x=x[EllipIndex.x], y=x[EllipIndex.y], z=x[EllipIndex.z]),
-        get_Az(x=x[EllipIndex.x], y=x[EllipIndex.y], z=x[EllipIndex.z])]
+        get_Ax(x=x[VarIndex.x], y=x[VarIndex.y], z=x[VarIndex.z]),
+        get_Ay(x=x[VarIndex.x], y=x[VarIndex.y], z=x[VarIndex.z]),
+        get_Az(x=x[VarIndex.x], y=x[VarIndex.y], z=x[VarIndex.z])]
     return deriv_xdot_func_vec(vec_input=x, θ=0, θdot=0, ϕdot=ϕdot, A1=Ai[EllipIndex.x],
                                 ρ_real_over_ρ_pressure=ρ_real_over_ρ_pressure,
                                 ρ_pressure_over_ρ_tides=ρ_pressure_over_ρ_tides)**2 + \
             deriv_ydot_func_vec(vec_input=x, θ=0, θdot=0, ϕdot=ϕdot, A2=Ai[EllipIndex.y],
                                 ρ_real_over_ρ_pressure=ρ_real_over_ρ_pressure,
-                                ρ_pressure_over_ρ_tides=ρ_pressure_over_ρ_tides)**2+ \
+                                ρ_pressure_over_ρ_tides=ρ_pressure_over_ρ_tides)**2 + \
             deriv_zdot_func_vec(vec_input=x, A3=Ai[EllipIndex.z],
                                 ρ_real_over_ρ_pressure=ρ_real_over_ρ_pressure,
                                 ρ_pressure_over_ρ_tides=ρ_pressure_over_ρ_tides)**2
@@ -110,7 +110,6 @@ def get_rot_equ_axis_lengths(alpha, rho_lim, ρ_tides, ρ_init=1.0001, small_equ
 
     # Constants
     ϕdot = alpha * sqrt(ρ_tides)
-
     # Get the axis ratios and the lengths for the first step in which no gravity is considered to be acting.
     a2oa1, a3oa1 = internal_streaming_axis_length_ratio_solver(alpha)
     a1 = get_ai_lengths(alpha=alpha, ρ=ρ_init, ρ_tidal=ρ_tides, return_only_a1=True)
@@ -125,7 +124,7 @@ def get_rot_equ_axis_lengths(alpha, rho_lim, ρ_tides, ρ_init=1.0001, small_equ
     flag_list = []
     # and solve for the first actual length of a1 WHERE GRAVITY IS INCLUDED.
     a1_new = sco.root(fun=combined_deriv_eqs, x0=np.array([a1, a2, a3]),
-                      args=(ρ_init, 1 / ρ_tides, ϕdot), method='anderson',
+                      args=(ρ_init, 1/ρ_tides, ϕdot), method='anderson',
                       options={"maxiter": 1000, "fatol": 1e-13})
     # append the values to lists
     ai_list.append(a1_new.x)
@@ -135,13 +134,11 @@ def get_rot_equ_axis_lengths(alpha, rho_lim, ρ_tides, ρ_init=1.0001, small_equ
 
     # Begin solving the system to the desired parameters.
     while True:
-
-        a1_new = sco.root(fun=combined_deriv_eqs, x0=a1_new.x, args=(ρ_init, 1 / ρ_tides, ϕdot),
+        a1_new = sco.root(fun=combined_deriv_eqs, x0=a1_new.x, args=(ρ_init, 1/ρ_tides, ϕdot),
                           method='lm',
-                          options={"xtol": 1e-12, "maxfev": 100000, "ftol":1e-12})
+                          options={"xtol": 1e-12, "maxfev": 100000, "ftol": 1e-5, "maxiter": 25000})
         # a1_new = sco.minimize(fun=combined_deriv_eqs_quad, x0=a1_new.x, args=(ρ_init, 1/ρ_tides, ϕdot), tol=1e-12, method="Nelder-Mead", options={"adaptive":True, "xatol": 1e-12, "maxfev": 100000, "fatol":1e-12})
         # a1_new = sco.differential_evolution(func=combined_deriv_eqs_quad, bounds=[(0.2, 1), (0.2, 1), (0.2, 1)], args=(ρ_init, 1/ρ_tides, ϕdot), tol=1e-12)
-
         indexs_calculated += 1
         ai_list.append(a1_new.x)
         ρ_list.append(ρ_init)
@@ -196,7 +193,7 @@ def get_rot_equ_axis_lengths(alpha, rho_lim, ρ_tides, ρ_init=1.0001, small_equ
             raise SystemExit
 
         # increment density and back through the loop we go
-        ρ_init = ρ_init + 1/1000
+        ρ_init = ρ_init + 1/2000
 
     if final_only:
         ai_list = ai_list[-1]

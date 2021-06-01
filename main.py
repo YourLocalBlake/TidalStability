@@ -26,7 +26,7 @@ method = "streaming"                            # Specify method for initial con
 # Calculate required values
 ρ_real_over_ρ_pressure = get_BE_mass_1to4_ratio(ratio)
 
-# ## ### #### ##### ###### ####### manual ####### ###### ##### #### ### ## #
+# ## ### #### ##### ###### ####### ######## manual ######## ####### ###### ##### #### ### ## #
 if method == "manual":
     # Set system values, Note set manually init_ai
     ρ_real_over_ρ_tides = 25
@@ -37,7 +37,7 @@ if method == "manual":
     if equ_radius == -1:
         raise SystemExit("No Bonnor-Ebert equilibrium radius was found")
 
-# ## ### #### ##### ###### ####### equilibrium ####### ###### ##### #### ### ## #
+# ## ### #### ##### ###### ####### ######## equilibrium ######## ####### ###### ##### #### ### ## #
 elif method == "equilibrium":
     # Set system values
     a3_over_a1_index = 950                      # consult author for information regarding index, R:568, M:462, L:358
@@ -48,18 +48,24 @@ elif method == "equilibrium":
     mass_r = get_BE_mass_0to5sqrt5o16(ρ_real_over_ρ_pressure)
     equ_radius = 1
 
-# ## ### #### ##### ###### ####### streaming ####### ###### ##### #### ### ## #
+# ## ### #### ##### ###### ####### ######## streaming ######## ####### ###### ##### #### ### ## #
 elif method == "streaming":
-    # Set system values, NOTE: init_ϕ_v should be set as "alpha * 1/sqrt(ρ_pressure_over_ρ_tides)"
+    # Set system values, NOTE: init_ϕ_v should be set as "alpha/sqrt(ρ_pressure_over_ρ_tides)"
     alpha = -0.1                                # Internal streaming rate
-    ρ_pressure_over_ρ_tides = 25                # Choose tidal strength
+    ρ_pressure_over_ρ_tides = 4.5                 # Choose tidal strength
     # Calculate required values
+    print("In, r/p = {}, p/t={}".format(ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides))
     ai_lens, mass, ρs = get_rot_equ_axis_lengths(alpha, ρ_real_over_ρ_pressure, 1/ρ_pressure_over_ρ_tides)
     ρ_real_over_ρ_pressure = ρs[0]
     ρ_real_over_ρ_tides = ρ_real_over_ρ_pressure * ρ_pressure_over_ρ_tides
     mass_r = get_BE_mass_0to5sqrt5o16(ρ_real_over_ρ_pressure)
+    print("Out, r/p = {}, p/t={}".format(ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides))
     equ_radius = 1
-
+    ai_lens, mass, ρs = get_rot_equ_axis_lengths(alpha, ρ_real_over_ρ_pressure, 1 / ρ_pressure_over_ρ_tides)
+    ρ_real_over_ρ_pressure = ρs[0]
+    ρ_real_over_ρ_tides = ρ_real_over_ρ_pressure * ρ_pressure_over_ρ_tides
+    mass_r = get_BE_mass_0to5sqrt5o16(ρ_real_over_ρ_pressure)
+    print("again, r/p = {}, p/t={}".format(ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides))
 else:
     raise SystemExit("No method selected, got {} require manual, equilibrium or streaming")
 
@@ -73,7 +79,7 @@ init_a1_v = 0                                   # Initial velocity of a1 axis, s
 init_a2_v = 0                                   # Initial velocity of a2 axis, scaled by equ. radius
 init_a3_v = 0                                   # Initial velocity of a3 axis, scaled by equ. radius
 init_θ_v = 0                                    # Initial velocity of the θ rotation angle
-init_ϕ_v = 0                                    # Initial velocity of the ϕ rotation angle
+init_ϕ_v = alpha/sqrt(ρ_pressure_over_ρ_tides)  # Initial velocity of the ϕ rotation angle
 
 start_time = 0                                  # Time to start the simulation
 stop_time = 25                                  # Time to stop simulation in seconds - will be scaled by time unit
@@ -145,6 +151,8 @@ print("Density ratios were:")
 print("gravity to tides: ", ρ_real_over_ρ_tides)
 print("pressure to tides: ", ρ_pressure_over_ρ_tides)
 print("density to pressure ratio: ", ρ_real_over_ρ_pressure)
+from src.utils import get_physical_scale
+print("Physical lengths are", get_physical_scale(soln, time, 300, 1.5E9))
 
 plt.subplot(3, 2, 1)
 plt.plot(time, soln[:, ODEIndex.x], label="a1", color='black')
