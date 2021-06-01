@@ -69,6 +69,14 @@ def ode_system(*, a1, a2, a3, ρ_pressure_over_ρ_tides, ρ_real_over_ρ_pressur
         # Symbols and time-dependent-constants for equations
         Ai = [get_Ax(x=x, y=y, z=z), get_Ay(x=x, y=y, z=z), get_Az(x=x, y=y, z=z)]
         ρ_real_over_ρ_pressure_updating = ρ_real_over_ρ_pressure/(x * y * z)
+        #
+        # print("Ai", Ai)
+        # print("A1*x*y*z", Ai[0] * x * y * z * ρ_real_over_ρ_pressure_updating)
+        # print("A1*mass_r", Ai[0] * 0.6987712429686843)
+        # print("A2*x*y*z", Ai[1] * x * y * z * ρ_real_over_ρ_pressure_updating)
+        # print("A2*mass", Ai[1] * 0.6987712429686843)
+        # print("A3*x*y*z", Ai[2] * x * y * z * ρ_real_over_ρ_pressure_updating)
+        # print("A3*mass", Ai[0] * 0.6987712429686843)
         # Physical checks:
         if x <= 0.01 or y <= 0.01 or z <= 0.01:
             if store_internal:
@@ -249,7 +257,7 @@ def solution(*, initial_conditions, solver_config, save_data, folder_name):
     mp.dps = 50
 
     # Initialise the time over which to solve the system
-    time = linspace(solver_config.start, solver_config.stop, solver_config.num_time)
+    time = linspace(solver_config.start, solver_config.stop, int(solver_config.num_time))
     time_length_passed = solver_config.num_time
 
     # Compute the solution
