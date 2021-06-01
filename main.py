@@ -2,10 +2,10 @@ from math import sqrt, pi
 from time import time as current_time
 import numpy as np
 import matplotlib.pyplot as plt
-
 from tidal_stability.utils import ODEIndex, get_BE_equilibrium_radius, get_BE_mass_0to5sqrt5o16, get_BE_mass_1to4_ratio
 from tidal_stability.data_formats import InitialConditions, ConfigParams
 from tidal_stability.solve.solution import solution
+# test
 
 ########################################################################################################################
 #                                                                                                                      #
