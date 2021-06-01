@@ -38,7 +38,7 @@ jobs:
 #      py39:
 #        python.version: '3.9'
 #        TOXENV: py39
-    maxParallel: 1
+    # maxParallel: 1
 
   steps:
     - template: ci/azure-pipelines-steps.yml
