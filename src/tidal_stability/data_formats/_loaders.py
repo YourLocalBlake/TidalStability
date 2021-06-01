@@ -3,7 +3,7 @@ Load phy5 files
 """
 import h5py
 
-from src.data_formats import Solution, InitialConditions, ConfigParams, InternalData
+from tidal_stability.data_formats import Solution, InitialConditions, ConfigParams, InternalData
 
 
 def solution_loader(override=False, file_name=None, folder_name="solved_odes"):

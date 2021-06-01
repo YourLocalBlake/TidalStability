@@ -12,16 +12,15 @@ from scikits.odes import ode
 from scikits.odes.sundials import CVODESolveFailed, CVODESolveFoundRoot, CVODESolveReachedTSTOP
 from scikits.odes.sundials.cvode import StatusEnum
 
-from src.utils import ODEIndex, EllipIndex
-from src.data_formats import InternalData, Solution, create_results_file
-from src.solve.utils import xy_close_stop_generator, get_jump_amount, ontstop_cont, ontstop_stop
-from src.solve.geometry import get_Ax, get_Ay, get_Az
-from src.solve.deriv_funcs import (deriv_x_func, deriv_xdot_func,
+from tidal_stability.utils import ODEIndex, EllipIndex
+from tidal_stability.data_formats import InternalData, Solution, create_results_file
+from tidal_stability.solve.utils import xy_close_stop_generator, get_jump_amount, ontstop_cont, ontstop_stop
+from tidal_stability.solve.geometry import get_Ax, get_Ay, get_Az
+from tidal_stability.solve.deriv_funcs import (deriv_x_func, deriv_xdot_func,
                                    deriv_y_func, deriv_ydot_func,
                                    deriv_z_func, deriv_zdot_func,
                                    deriv_θ_func, deriv_θdot_func,
-                                   deriv_ϕ_func, deriv_ϕθdot_func,
-                                   deriv_ϕdot_func)
+                                   deriv_ϕ_func, deriv_ϕθdot_func)
 
 
 def ode_system(*, a1, a2, a3, ρ_pressure_over_ρ_tides, ρ_real_over_ρ_pressure, store_internal=True):
@@ -250,7 +249,7 @@ def solution(*, initial_conditions, solver_config, save_data, folder_name):
     mp.dps = 50
 
     # Initialise the time over which to solve the system
-    time = linspace(solver_config.start, solver_config.stop, solver_config.num_time)
+    time = linspace(solver_config.start, solver_config.stop, int(solver_config.num_time))
     time_length_passed = solver_config.num_time
 
     # Compute the solution
