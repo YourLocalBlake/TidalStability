@@ -4,8 +4,8 @@ Useful utilises for the solver.
 
 from numpy import linspace, sign
 
-from src.physics_constants import cG, ckB, cmH
-from src.utils import ODEIndex
+from tidal_stability.physics_constants import cG, ckB, cmH
+from tidal_stability.utils import ODEIndex
 
 
 def get_Ω2(*, dis, mass_bh):
