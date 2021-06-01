@@ -29,15 +29,15 @@ jobs:
       py36:
         python.version: '3.6'
         TOXENV: py36
-      py37:
-        python.version: '3.7'
-        TOXENV: py37
-      py38:
-        python.version: '3.8'
-        TOXENV: py38
-      py39:
-        python.version: '3.9'
-        TOXENV: py39
+#      py37:
+#        python.version: '3.7'
+#        TOXENV: py37
+#      py38:
+#        python.version: '3.8'
+#        TOXENV: py38
+#      py39:
+#        python.version: '3.9'
+#        TOXENV: py39
     maxParallel: 1
 
   steps:
