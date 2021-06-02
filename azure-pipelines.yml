@@ -4,7 +4,7 @@ variables:
   PIP_CACHE_DIR: $(Pipeline.Workspace)/cache/pip
 
 
-# jobs:
+jobs:
 #- job: 'static_checks'
 #  pool:
 #    vmImage: ubuntu-16.04
@@ -21,7 +21,7 @@ variables:
 #    - script: |
 #        tox
 #      displayName: tox
-job: 'ubuntu1604'
+- job: 'ubuntu1604'
   pool:
     vmImage: ubuntu-16.04
   #strategy:
@@ -41,10 +41,10 @@ job: 'ubuntu1604'
 #        TOXENV: py39
     # maxParallel: 1
 
-  steps:
-    - template: ci/azure-pipelines-steps.yml
-      parameters:
-        platform: linux
+#  steps:
+#    - template: ci/azure-pipelines-steps.yml
+#      parameters:
+#        platform: linux
 
 #- job: 'macOS1015'
 #  pool:
