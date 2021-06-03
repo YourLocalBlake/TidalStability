@@ -3,4 +3,7 @@
 *.iml
 *.idea/
 *.hdf5
+*.egg-info/
 solved_odes/
+dist/
+build/
