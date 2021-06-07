@@ -12,7 +12,7 @@ def get_Ω2(*, dis, mass_bh):
     """
     Compute the angular velocity squared of the cloud around the blackhole.
     """
-    return cG * mass_bh/dis**3
+    return cG * mass_bh / dis ** 3
 
 
 def get_cs2(*, temp, mu):
@@ -54,15 +54,17 @@ def get_jump_amount(x, y, xdot, ydot, override=False):
         jumped_x = x + xdot * dt
         jumped_y = y + ydot * dt
         if diff_sign == 1:
-            if jumped_x - jumped_y < - 1.001 * diff:
+            if jumped_x - jumped_y < -1.001 * diff:
                 print("Jumping over a time of {}".format(dt))
                 return dt
         if diff_sign == -1:
-            if jumped_x - jumped_y > - 1.001 * diff:
+            if jumped_x - jumped_y > -1.001 * diff:
                 print("Jumping over a time of {}".format(dt))
                 return dt
 
-    print("No jump time was sufficient to cross, check values or apply override - check solution convergence")
+    print(
+        "No jump time was sufficient to cross, check values or apply override - check solution convergence"
+    )
     raise SystemExit
 
 
@@ -70,6 +72,7 @@ def ontstop_cont():
     """
     Return function which stops the ODE solver when called
     """
+
     def tstop_func(time, params, out):
         """
         The function required by sundials

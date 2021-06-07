@@ -3,7 +3,12 @@ Load phy5 files
 """
 import h5py
 
-from tidal_stability.data_formats import Solution, InitialConditions, ConfigParams, InternalData
+from tidal_stability.data_formats import (
+    Solution,
+    InitialConditions,
+    ConfigParams,
+    InternalData,
+)
 
 
 def solution_loader(override=False, file_name=None, folder_name="solved_odes"):
@@ -12,7 +17,7 @@ def solution_loader(override=False, file_name=None, folder_name="solved_odes"):
     Returns the 4 data objects
     """
 
-    file = str(folder_name)+"/TidalStability_"+str(file_name)+".hdf5"
+    file = str(folder_name) + "/TidalStability_" + str(file_name) + ".hdf5"
 
     if override:
         file = override
@@ -23,7 +28,7 @@ def solution_loader(override=False, file_name=None, folder_name="solved_odes"):
             times=f["solution"]["times"][:],
             flags=f["solution"]["flags"][:],
             tstop_times=f["solution"].attrs["tstop_times"],
-            jump_times=f["solution"].attrs["jump_times"]
+            jump_times=f["solution"].attrs["jump_times"],
         )
 
         config_params = ConfigParams(
@@ -37,7 +42,7 @@ def solution_loader(override=False, file_name=None, folder_name="solved_odes"):
             taylor_jumps_num=f["solver_config"].attrs["taylor_jumps_num"],
             taylor_jump_threshold=f["solver_config"].attrs["taylor_jump_threshold"],
             enable_tstop=f["solver_config"].attrs["enable_tstop"],
-            tstop_times=f["solver_config"].attrs["tstop_times"]
+            tstop_times=f["solver_config"].attrs["tstop_times"],
         )
 
         internal_data = InternalData(
@@ -54,14 +59,18 @@ def solution_loader(override=False, file_name=None, folder_name="solved_odes"):
             θdot=f["internal_data"]["θdot"][:],
             ϕ=f["internal_data"]["ϕ"][:],
             ϕdot=f["internal_data"]["ϕdot"][:],
-            problems=f["internal_data"].attrs["problems"]
+            problems=f["internal_data"].attrs["problems"],
         )
 
         initial_conditions = InitialConditions(
             ode_init_con=f["initial_conditions"]["ode_initial_conditions"][:],
             ρ_real_over_ρ_tides=f["initial_conditions"].attrs["ρ_real_over_ρ_tides"],
-            ρ_pressure_over_ρ_tides=f["initial_conditions"].attrs["ρ_pressure_over_ρ_tides"],
-            ρ_real_over_ρ_pressure=f["initial_conditions"].attrs["ρ_real_over_ρ_pressure"],
+            ρ_pressure_over_ρ_tides=f["initial_conditions"].attrs[
+                "ρ_pressure_over_ρ_tides"
+            ],
+            ρ_real_over_ρ_pressure=f["initial_conditions"].attrs[
+                "ρ_real_over_ρ_pressure"
+            ],
             mass_r=f["initial_conditions"].attrs["mass_r"],
             equ_radius=f["initial_conditions"].attrs["equ_radius"],
         )
