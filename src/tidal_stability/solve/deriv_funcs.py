@@ -15,21 +15,27 @@ def deriv_x_func(*, xdot):
     return xdot, xdot
 
 
-def deriv_xdot_func(*, x, y, z, θ, θdot, ϕdot, A1, ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides):
+def deriv_xdot_func(
+    *, x, y, z, θ, θdot, ϕdot, A1, ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides
+):
     """
     Compute the derivative of the derivative of the axis of the ellipsoid
     """
     return (
-        1/x * (
-            + ϕdot * (+ ϕdot * x**2 + 2 * x * y * (+ θdot + 1/sqrt(ρ_pressure_over_ρ_tides)))
-            + x**2 * (
-                + θdot * (θdot + 2/sqrt(ρ_pressure_over_ρ_tides))
-                + 3/ρ_pressure_over_ρ_tides * cos(θ)**2
-                - 9/2 * A1 * x * y * z * ρ_real_over_ρ_pressure
+        1
+        / x
+        * (
+            +ϕdot
+            * (+ϕdot * x ** 2 + 2 * x * y * (+θdot + 1 / sqrt(ρ_pressure_over_ρ_tides)))
+            + x ** 2
+            * (
+                +θdot * (θdot + 2 / sqrt(ρ_pressure_over_ρ_tides))
+                + 3 / ρ_pressure_over_ρ_tides * cos(θ) ** 2
+                - 9 / 2 * A1 * x * y * z * ρ_real_over_ρ_pressure
             )
-            + 5 * (1 - 1/ρ_real_over_ρ_pressure)
-        )
-        , 0
+            + 5 * (1 - 1 / ρ_real_over_ρ_pressure)
+        ),
+        0,
     )
 
 
@@ -40,21 +46,27 @@ def deriv_y_func(*, ydot):
     return ydot, ydot
 
 
-def deriv_ydot_func(*, x, y, z, θ, θdot, ϕdot, A2, ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides):
+def deriv_ydot_func(
+    *, x, y, z, θ, θdot, ϕdot, A2, ρ_real_over_ρ_pressure, ρ_pressure_over_ρ_tides
+):
     """
     Compute the derivative of the derivative of the axis of the ellipsoid ellipsoid
     """
     return (
-        1/y * (
-            + ϕdot * (+ ϕdot * y**2 + 2 * x * y * (+ θdot + 1/sqrt(ρ_pressure_over_ρ_tides)))
-            + y**2 * (
-                + θdot * (θdot + 2/sqrt(ρ_pressure_over_ρ_tides))
-                + 3/ρ_pressure_over_ρ_tides * sin(θ)**2
-                - 9/2 * A2 * x * y * z * ρ_real_over_ρ_pressure
+        1
+        / y
+        * (
+            +ϕdot
+            * (+ϕdot * y ** 2 + 2 * x * y * (+θdot + 1 / sqrt(ρ_pressure_over_ρ_tides)))
+            + y ** 2
+            * (
+                +θdot * (θdot + 2 / sqrt(ρ_pressure_over_ρ_tides))
+                + 3 / ρ_pressure_over_ρ_tides * sin(θ) ** 2
+                - 9 / 2 * A2 * x * y * z * ρ_real_over_ρ_pressure
             )
-            + 5 * (1 - 1/ρ_real_over_ρ_pressure)
-        )
-        , 0
+            + 5 * (1 - 1 / ρ_real_over_ρ_pressure)
+        ),
+        0,
     )
 
 
@@ -70,14 +82,17 @@ def deriv_zdot_func(*, x, y, z, A3, ρ_real_over_ρ_pressure, ρ_pressure_over_�
     Compute the derivative of the derivative of the axis of the ellipsoid
     """
     return (
-        1/z * (
-            - z**2 * (
-                + 9/2 * A3 * x * y * z * ρ_real_over_ρ_pressure
-                + 1/ρ_pressure_over_ρ_tides
+        1
+        / z
+        * (
+            -(z ** 2)
+            * (
+                +9 / 2 * A3 * x * y * z * ρ_real_over_ρ_pressure
+                + 1 / ρ_pressure_over_ρ_tides
             )
-            + 5 * (1 - 1/ρ_real_over_ρ_pressure)
-        )
-        , 0
+            + 5 * (1 - 1 / ρ_real_over_ρ_pressure)
+        ),
+        0,
     )
 
 
@@ -93,12 +108,14 @@ def deriv_θdot_func(*, x, xdot, y, ydot, θ, θdot, ϕdot, ρ_pressure_over_ρ_
     Compute the derivative of the derivative of the θ axis of the ellipsoid
     """
     return (
-        1/((-x + y) * (x + y)) * (
-                + 2 * (xdot * x - ydot * y) * (θdot + sqrt(1/ρ_pressure_over_ρ_tides))
-                + 2 * ϕdot * (- xdot * y + ydot * x)
-                + 3/2 * sin(2 * θ) * (x**2 + y**2) * 1/ρ_pressure_over_ρ_tides
-        )
-        , 0
+        1
+        / ((-x + y) * (x + y))
+        * (
+            +2 * (xdot * x - ydot * y) * (θdot + sqrt(1 / ρ_pressure_over_ρ_tides))
+            + 2 * ϕdot * (-xdot * y + ydot * x)
+            + 3 / 2 * sin(2 * θ) * (x ** 2 + y ** 2) * 1 / ρ_pressure_over_ρ_tides
+        ),
+        0,
     )
 
 
@@ -109,29 +126,44 @@ def deriv_ϕ_func(*, ϕdot):
     return ϕdot, ϕdot
 
 
-def deriv_ϕθdot_func(*,  x, xdot, y, ydot, θ, θdot, ϕdot, ρ_pressure_over_ρ_tides):
+def deriv_ϕθdot_func(*, x, xdot, y, ydot, θ, θdot, ϕdot, ρ_pressure_over_ρ_tides):
     """
     Compute the derivative of the derivative of the ϕ axis of the ellipsoid
     """
     return (
-        1/(x + y) * (
-            - 2 * (xdot + ydot) * (θdot + ϕdot + sqrt(1/ρ_pressure_over_ρ_tides))
-            - 3/2 * sin(2 * θ) * (x - y) * 1/ρ_pressure_over_ρ_tides
-        )
-        , 0
+        1
+        / (x + y)
+        * (
+            -2 * (xdot + ydot) * (θdot + ϕdot + sqrt(1 / ρ_pressure_over_ρ_tides))
+            - 3 / 2 * sin(2 * θ) * (x - y) * 1 / ρ_pressure_over_ρ_tides
+        ),
+        0,
     )
 
 
-def deriv_ϕdot_func(*,  x, xdot, y, ydot, θ, θdot, ϕdot, ρ_tides_over_ρ_pressure, sqrt_ρ_tides_over_ρ_pressure):
+def deriv_ϕdot_func(
+    *,
+    x,
+    xdot,
+    y,
+    ydot,
+    θ,
+    θdot,
+    ϕdot,
+    ρ_tides_over_ρ_pressure,
+    sqrt_ρ_tides_over_ρ_pressure
+):
     """
     Compute the derivative of the derivative of the ϕ axis of the ellipsoid
     """
 
     return (
-        1/((x - y) * (x + y)) * (
-            + 2 * ϕdot * (- xdot * x + ydot * y)
+        1
+        / ((x - y) * (x + y))
+        * (
+            +2 * ϕdot * (-xdot * x + ydot * y)
             + 2 * (xdot * y - ydot * x) * (θdot + sqrt_ρ_tides_over_ρ_pressure)
             + 3 * ρ_tides_over_ρ_pressure * x * y * sin(2 * θ)
-        )
-        , 0
+        ),
+        0,
     )

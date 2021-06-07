@@ -7,7 +7,9 @@ import arrow
 from numpy import array
 
 
-def create_results_file(solution_dump, internal_data_dump, init_con_dump, solver_config_dump, folder_name):
+def create_results_file(
+    solution_dump, internal_data_dump, init_con_dump, solver_config_dump, folder_name
+):
     """
     Save the results from a solution run in a hdf5 file
     inputs are the 4 data objects/classes
@@ -17,17 +19,28 @@ def create_results_file(solution_dump, internal_data_dump, init_con_dump, solver
         # with h5py.File("{}/TidalStability_".format(folder_name) + "sg_tides_{}_sg_p_{}_mr_{}".format(
         #     init_con_dump.ρ_real_over_ρ_tides, init_con_dump.ρ_real_over_ρ_pressure,
         #     init_con_dump.mass_r * 1/(5/16 * sqrt(5))) + ".hdf5", "x") as f:
-        with h5py.File("{}/TidalStability_".format(folder_name) + str(arrow.now().format("YYYY-MM-DD--HH-mm")), "x") as f:
-            _solution_dumper(f.create_group("solution"), solution_dump, solver_config_dump)
-            _initial_conditions(f.create_group("initial_conditions"), init_con_dump, solver_config_dump)
+        with h5py.File(
+            "{}/TidalStability_".format(folder_name)
+            + str(arrow.now().format("YYYY-MM-DD--HH-mm")),
+            "x",
+        ) as f:
+            _solution_dumper(
+                f.create_group("solution"), solution_dump, solver_config_dump
+            )
+            _initial_conditions(
+                f.create_group("initial_conditions"), init_con_dump, solver_config_dump
+            )
             _config_dumper(f.create_group("solver_config"), solver_config_dump)
             _internal_data_dumper(f.create_group("internal_data"), internal_data_dump)
             f.attrs["date_solved"] = [str(arrow.now().format("YYYY-MM-DD--HH-mm"))]
             # print("Solution saved as '/{}/TidalStability_".format(folder_name)
             #       + "sg_tides_{}_sg_p_{}_mr_{}".format(init_con_dump.ρ_real_over_ρ_tides,
             #       init_con_dump.ρ_real_over_ρ_pressure, init_con_dump.mass_r * 1/(5/16 * sqrt(5))) + ".hdf5'")
-            print("Solution saved as '/{}/TidalStability_".format(folder_name)
-                  + str(arrow.now().format("YYYY-MM-DD--HH-mm")) + ".hdf5")
+            print(
+                "Solution saved as '/{}/TidalStability_".format(folder_name)
+                + str(arrow.now().format("YYYY-MM-DD--HH-mm"))
+                + ".hdf5"
+            )
             # Doesn't return anything, just saves the file.
     else:
         print("No properly formatted solution was given. No hdf5 file created.")
@@ -51,7 +64,7 @@ def _solution_dumper(grp, solution, solver_config):
         grp.attrs["tstop_times"] = ["NOT_ENABLED"]
     if solver_config.enable_taylor_jump:
         try:
-            grp.attrs["jump_times"] = [i.encode('utf8') for i in solution.jump_times]
+            grp.attrs["jump_times"] = [i.encode("utf8") for i in solution.jump_times]
         except TypeError:
             grp.attrs["jump_times"] = ["No_Jumps"]
     else:
@@ -113,5 +126,5 @@ def _internal_data_dumper(grp, internal_data):
     grp.create_dataset("θdot", data=internal_data.θdot)
     grp.create_dataset("ϕ", data=internal_data.ϕ)
     grp.create_dataset("ϕdot", data=array(internal_data.ϕdot))
-    grp.attrs["problems"] = [i.encode('utf8') for i in internal_data.problems]
+    grp.attrs["problems"] = [i.encode("utf8") for i in internal_data.problems]
     return grp

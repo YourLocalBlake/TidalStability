@@ -12,6 +12,7 @@ class InitialConditions:
     """
     Datastructure for the initial conditions of the system and ODE
     """
+
     ρ_real_over_ρ_tides = attr.ib()
     ρ_pressure_over_ρ_tides = attr.ib()
     ρ_real_over_ρ_pressure = attr.ib()
@@ -19,10 +20,15 @@ class InitialConditions:
     equ_radius = attr.ib()
     ode_init_con = attr.ib(default=attr.Factory(list))
     after_tstop_params = attr.ib(default=attr.Factory(list))
+
     @ode_init_con.validator
     def check(self, attribute, values):
         if len(values) != 10:
-            raise RuntimeError("ODE requires 10 initial conditions, {} were given".format(len(self.ode_init_con)))
+            raise RuntimeError(
+                "ODE requires 10 initial conditions, {} were given".format(
+                    len(self.ode_init_con)
+                )
+            )
 
 
 @attr.s
@@ -30,6 +36,7 @@ class ConfigParams:
     """
     Datastructure for the runtime configuration options.
     """
+
     start = attr.ib()
     stop = attr.ib()
     num_time = attr.ib()
@@ -48,6 +55,7 @@ class Solution:
     """
     Datastructure of solutions.
     """
+
     times = attr.ib()
     solution = attr.ib()
     flags = attr.ib(default=attr.Factory(list))
@@ -60,6 +68,7 @@ class InternalData:
     """
     Datastructure for internally solved params
     """
+
     params = attr.ib(default=attr.Factory(list))
     derivs = attr.ib(default=attr.Factory(list))
     times = attr.ib(default=attr.Factory(list))
