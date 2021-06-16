@@ -7,3 +7,5 @@
 solved_odes/
 dist/
 build/
+.tox
+.coverage_html
