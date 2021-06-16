@@ -1,5 +1,7 @@
 # from matplotlib's azure setup
 
+trigger: none
+
 variables:
   PIP_CACHE_DIR: $(Pipeline.Workspace)/cache/pip
 
