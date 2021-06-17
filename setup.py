@@ -27,7 +27,7 @@ setuptools.setup(
     author="Blake Staples",
     author_email="yourlocalblake@gmail.com",
     description="Solver for gas clouds around Black Holes",
-    long_description=long_description,
+    #long_description=long_description,
     license="GPLv3",
     url="https://github.com/YourLocalBlake/TidalStability",
     classifiers=[
