@@ -35,7 +35,6 @@ setuptools.setup(
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.8',
         'Topic :: Scientific/Engineering :: Astronomy',
     ],
     include_package_data=True,
