@@ -23,7 +23,7 @@ setuptools.setup(
         "scipy>=1.5.2",
         # todo: sundials -> allows scikits.
     ],
-    python_requires='==3.8',
+    # python_requires='==3.8',
     author="Blake Staples",
     author_email="yourlocalblake@gmail.com",
     description="Solver for gas clouds around Black Holes",
