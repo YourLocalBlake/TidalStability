@@ -3,7 +3,7 @@ set -ex
 
 SUNDIALS=sundials-"${SUNDIALS_VERSION:-5.1.0}"
 SUNDIALS_FILE=$SUNDIALS.tar.gz
-SUNDIALS_URL=https://computing.llnl.gov/projects/sundials/download/$SUNDIALS_FILE
+SUNDIALS_URL=https://github.com/LLNL/sundials/releases/download/v5.1.0/sundials-5.1.0.tar.gz
 PRECISION="${SUNDIALS_PRECISION:-double}"
 INDEX_SIZE="${SUNDIALS_INDEX_SIZE:-64}"
 
