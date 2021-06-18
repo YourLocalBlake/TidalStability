@@ -14,7 +14,7 @@ steps:
   condition: and(succeeded(), ne(variables['python.version'], 'Pre'))
 
 - bash: |
-    ci/ensure_sundials_installed.sh
+    ./ci/ensure_sundials_installed.sh
   displayName: "sundials script"
 
 - script: |
