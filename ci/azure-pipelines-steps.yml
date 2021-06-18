@@ -16,7 +16,7 @@ steps:
 - script: |
     # source ci/ensure_sundials_installed.sh
     python -m pip install --upgrade pip
-    pip install tox codecov setuptools wheels
+    pip install tox codecov setuptools wheel
   displayName: 'Install pip dependencies'
 
 - script: env
