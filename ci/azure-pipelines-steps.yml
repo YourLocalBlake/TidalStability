@@ -15,7 +15,7 @@ steps:
 
 - script: |
     python -m pip install --upgrade pip
-    pip install tox codecov
+    pip install tox codecov wheel
   displayName: 'Install pip dependencies'
 
 - script: env
