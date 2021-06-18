@@ -13,8 +13,11 @@ steps:
   displayName: 'Use Python $(python.version)'
   condition: and(succeeded(), ne(variables['python.version'], 'Pre'))
 
+- bash: |
+    ci/ensure_sundials_installed.sh
+  displayName: "sundials script"
+
 - script: |
-    bash ci/ensure_sundials_installed.sh
     python -m pip install --upgrade pip
     pip install tox codecov setuptools wheel
   displayName: 'Install pip dependencies'
