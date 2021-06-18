@@ -13,9 +13,10 @@ steps:
   displayName: 'Use Python $(python.version)'
   condition: and(succeeded(), ne(variables['python.version'], 'Pre'))
 
+
 - bash: |
     ls -l
-    cd ci
+    chmod +x /ci/install_sundials.sh
     ls -l
     ./ci/install_sundials.sh
   displayName: "Sundials script"
