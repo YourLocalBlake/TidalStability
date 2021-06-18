@@ -15,9 +15,8 @@ steps:
 
 
 - bash: |
-    ls -l
     chmod +x ci/install_sundials.sh
-    ls -l
+    mkdir -p include/sundials
     ./ci/install_sundials.sh
   displayName: "Sundials script"
 
