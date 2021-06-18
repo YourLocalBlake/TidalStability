@@ -14,7 +14,7 @@ steps:
   condition: and(succeeded(), ne(variables['python.version'], 'Pre'))
 
 - script: |
-    # source ci/ensure_sundials_installed.sh
+    source ci/ensure_sundials_installed.sh
     python -m pip install --upgrade pip
     pip install tox codecov setuptools wheel
   displayName: 'Install pip dependencies'
@@ -25,7 +25,7 @@ steps:
 - script: |
     tox
   displayName: 'tox'
-  env: {"BASH_ENV": "./ci/ensure_sundials_installed.sh"}
+  # env: {"BASH_ENV": "./ci/ensure_sundials_installed.sh"}
 
 - script: |
     codecov
