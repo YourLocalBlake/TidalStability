@@ -15,7 +15,7 @@ steps:
 
 - script: |
     python -m pip install --upgrade pip
-    pip install tox codecov wheel
+    pip install tox codecov
   displayName: 'Install pip dependencies'
 
 - script: env
@@ -24,7 +24,7 @@ steps:
 - script: |
     tox
   displayName: 'tox'
-  env: {"BASH_ENV": "./ci_support/ensure_sundials_installed.sh"}
+  env: {"BASH_ENV": "./ci/ensure_sundials_installed.sh"}
 
 - script: |
     codecov
