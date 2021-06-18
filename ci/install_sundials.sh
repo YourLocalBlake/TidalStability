@@ -5,7 +5,6 @@
 # Copyright (C) 2011-12  Benny Malengier
 # All rights reserved.
 # Reproduced under the new-BSD licence.
-
 set -ex
 
 SUNDIALS=sundials-"${SUNDIALS_VERSION:-5.1.0}"

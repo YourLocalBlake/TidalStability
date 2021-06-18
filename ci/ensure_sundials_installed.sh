@@ -5,7 +5,6 @@
 # Copyright (C) 2011-12  Benny Malengier
 # All rights reserved.
 # Reproduced under the new-BSD licence and slightly modified.
-
 SUNDIALS_DEFAULT_VERSION='5.1.0'
 SUNDIALS_DEFAULT_PRECISION='double'
 SUNDIALS_DEFAULT_INDEX_SIZE='64'
