@@ -15,11 +15,11 @@ steps:
 
 
 - bash: |
-#    chmod +x ci/install_sundials.sh
-#    ./ci/install_sundials.sh
     chmod +x ci/ensure_sundials_installed.sh
     ./ci/ensure_sundials_installed.sh
   displayName: "Sundials script"
+#    chmod +x ci/install_sundials.sh
+#    ./ci/install_sundials.sh
 
 - script: |
     python -m pip install --upgrade pip
