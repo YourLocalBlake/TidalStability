@@ -22,7 +22,7 @@ setuptools.setup(
         "mpmath>=1.1.0",
         "numpy>=1.19.2",
         "scipy>=1.5.2",
-        "scikits.odes>=2.3.0dev0,<2.6",
+        "scikits.odes",
     ],
     # python_requires='==3.8',
     author="Blake Staples",
