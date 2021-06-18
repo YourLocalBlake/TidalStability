@@ -11,7 +11,7 @@ SUNDIALS_INCLUDEDIR=$SUNDIALS_DIR/include
 if [ ! -d "$SUNDIALS_LIBDIR" ]; then
     mkdir -p $SUNDIALS_DIR
     echo "Installing sundials ${SUNDIALS_VERSION:-$SUNDIALS_DEFAULT_VERSION}"
-    ./ci_support/install_sundials.sh
+    ./ci/install_sundials.sh
 else
     echo "Using cached sundials in $SUNDIALS_LIBDIR"
 fi
