@@ -9,3 +9,4 @@ dist/
 build/
 .tox
 .coverage_html
+.coverage
