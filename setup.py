@@ -22,9 +22,9 @@ setuptools.setup(
         "mpmath>=1.1.0",
         "numpy>=1.19.2",
         "scipy>=1.5.2",
-        "scikits.odes",
+        "scikits.odes", #Ship without odes package - user required for os indep. install
     ],
-    # python_requires='==3.8',
+    python_requires='>=3.5',
     author="Blake Staples",
     author_email="yourlocalblake@gmail.com",
     description="Solver for gas clouds around Black Holes",

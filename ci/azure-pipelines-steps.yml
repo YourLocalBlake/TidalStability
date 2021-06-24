@@ -13,14 +13,11 @@ steps:
   displayName: 'Use Python $(python.version)'
   condition: and(succeeded(), ne(variables['python.version'], 'Pre'))
 
-
 - bash: |
     chmod +x ci/ensure_sundials_installed.sh
     chmod +x ci/install_sundials.sh
     ./ci/ensure_sundials_installed.sh
-  displayName: "Sundials script"
-#    chmod +x ci/install_sundials.sh
-#    ./ci/install_sundials.sh
+  displayName: "Install SUNDIALS script"
 
 - script: |
     python -m pip install --upgrade pip
@@ -31,7 +28,6 @@ steps:
   displayName: 'print env'
 
 - script: |
-
     tox
   displayName: 'tox'
   env: {"BASH_ENV": "./ci/ensure_sundials_installed.sh"}
