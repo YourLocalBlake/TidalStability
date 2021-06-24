@@ -1,7 +1,7 @@
 trigger: none
 
 jobs:
-- job: 'ubuntu1604'
+- job: 'ubuntu-latest'
   pool:
     vmImage: ubuntu-latest
   strategy:

@@ -30,6 +30,7 @@ steps:
 - script: |
     tox
   displayName: 'tox'
+  env: {"BASH_ENV": "./ci/ensure_sundials_installed.sh"}
 
 - script: |
     codecov
