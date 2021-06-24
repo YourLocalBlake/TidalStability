@@ -24,7 +24,7 @@ setuptools.setup(
         "scipy>=1.5.2",
         "scikits.odes", # Shipped without odes - user to install
     ],
-    python_requires='>=3.5',
+    python_requires='>=3.6',
     author="Blake Staples",
     author_email="yourlocalblake@gmail.com",
     description="Solver for gas clouds around Black Holes",
