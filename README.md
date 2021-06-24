@@ -1,6 +1,4 @@
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/tidal-stability)
-![PyPI - License](https://img.shields.io/pypi/l/tidal-stability)
-[![codecov](https://codecov.io/gh/YourLocalBlake/TidalStability/branch/master/graph/badge.svg?token=89VFTvptUh)](https://codecov.io/gh/YourLocalBlake/TidalStability)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/tidal-stability) ![PyPI - License](https://img.shields.io/pypi/l/tidal-stability) [![codecov](https://codecov.io/gh/YourLocalBlake/TidalStability/branch/master/graph/badge.svg?token=89VFTvptUh)](https://codecov.io/gh/YourLocalBlake/TidalStability)
 
 # TidalStability
 -------------------------------
