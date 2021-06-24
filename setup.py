@@ -2,6 +2,7 @@ import setuptools
 
 import codecs
 with codecs.open('README.md', 'r', 'utf-8') as f:
+    next(f)  # To skip the first line which contains the badges.
     long_description = f.read()
 
 version = None
@@ -21,13 +22,13 @@ setuptools.setup(
         "mpmath>=1.1.0",
         "numpy>=1.19.2",
         "scipy>=1.5.2",
-        # todo: sundials -> allows scikits.
+        "scikits.odes", # Shipped without odes - user to install
     ],
-    # python_requires='==3.8',
+    python_requires='>=3.6',
     author="Blake Staples",
     author_email="yourlocalblake@gmail.com",
     description="Solver for gas clouds around Black Holes",
-    #long_description=long_description,
+    long_description=long_description,
     license="GPLv3",
     url="https://github.com/YourLocalBlake/TidalStability",
     classifiers=[
@@ -35,6 +36,10 @@ setuptools.setup(
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Topic :: Scientific/Engineering :: Astronomy',
     ],
     include_package_data=True,
